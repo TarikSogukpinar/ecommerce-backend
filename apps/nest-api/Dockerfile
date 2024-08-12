@@ -1,5 +1,5 @@
 # Base image
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Set working directory
 WORKDIR /usr/src/app
@@ -15,7 +15,7 @@ COPY . .
 RUN npm run build
 
 # Expose port
-EXPOSE 3000
+EXPOSE 6070
 
 # Start the app
 CMD ["npm", "run", "start:prod"]

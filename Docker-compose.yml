@@ -4,12 +4,12 @@ services:
   nest-api:
     build: ./apps/nest-api
     ports:
-      - "3001:3000"
+      - "6070:6070"
 
   docs:
     build: ./apps/docs
     ports:
-      - "3002:3000"
+      - "6000:6000"
 
   go-app:
     build: ./apps/go-api
