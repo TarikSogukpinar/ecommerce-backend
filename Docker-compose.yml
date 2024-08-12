@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  nest-api:
+    build: ./apps/nest-api
+    ports:
+      - "3001:3000"
+
+  docs:
+    build: ./apps/docs
+    ports:
+      - "3002:3000"
+
+  go-app:
+    build: ./apps/go-api
+    ports:
+      - "6060:6060"

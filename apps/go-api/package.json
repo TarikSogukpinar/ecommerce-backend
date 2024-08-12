@@ -1,0 +1,12 @@
+{
+  "name": "go-api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+     "dev": "go run main.go"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
