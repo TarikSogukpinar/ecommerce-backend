@@ -21,19 +21,45 @@ enum Role {
 }
 
 model User {
-  id           String  @id @default(cuid())
-  uuid         String  @unique @default(uuid())
+  id           String    @id @default(cuid())
+  uuid         String    @unique @default(uuid())
   githubId     String?
   provider     String?
-  email        String  @unique
+  email        String    @unique
   image        String?
   name         String?
   password     String
   refreshToken String?
   accessToken  String?
-  role         Role    @default(USER)
+  role         Role      @default(USER)
+  Session      Session[]
 
   @@index([email])
   @@index([role])
   @@index([name])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  ipAddress String?
+  userAgent String?
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  expiresAt DateTime
+  isActive  Boolean  @default(true)
+
+  @@index([userId])
+  @@index([token])
+}
+
+model BlacklistedToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([expiresAt])
 }

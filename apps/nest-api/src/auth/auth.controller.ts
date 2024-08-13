@@ -23,7 +23,6 @@ import {
   ApiBody,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from './guards/auth.guard';
 import { CustomRequest } from '../core/request/customRequest';
 import { RegisterUserDto } from './dto/registerUser.dto';
 import { LogoutDto } from './dto/logout.dto';
@@ -33,8 +32,9 @@ import { LogoutResponseDto } from './dto/logoutResponse.dto';
 import { ConfigService } from '@nestjs/config';
 import { TokenService } from 'src/core/token/token.service';
 import { Request } from 'express';
-import { Roles } from './guards/role.guard';
 import { Role } from '@prisma/client';
+import { JwtAuthGuard } from './guard/auth.guard';
+import { Roles } from './guard/role.guard';
 
 @Controller({ path: 'auth', version: '1' })
 @ApiTags('Auth')
@@ -134,7 +134,7 @@ export class AuthController {
   })
   @HttpCode(HttpStatus.OK)
   @Roles(Role.ADMIN, Role.USER)
-  async getUserSessions(@Param('userId') userId: number) {
+  async getUserSessions(@Param('userId') userId: string) {
     return await this.authService.getUserSessions(userId);
   }
 
@@ -149,7 +149,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Roles(Role.ADMIN, Role.USER)
   async terminateUserSession(
-    @Param('userId') userId: number,
+    @Param('userId') userId: string,
     @Param('token') token: string,
   ) {
     const terminatedSession = await this.authService.terminateSession(
