@@ -9,8 +9,9 @@ import helmet from 'helmet';
 import * as hpp from 'hpp';
 import * as compression from 'compression';
 import * as cookieParser from 'cookie-parser';
-import { SwaggerService } from './core/swagger/swagger.service';
+
 import validationOptions from './utils/validate/validate-options';
+import { SwaggerService } from './core/swagger/swagger.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
