@@ -6,6 +6,8 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { PrismaModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
 import { SwaggerModule } from './core/swagger/swagger.module';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { RabbitMQService } from './core/rabbitMQ/rabbitmq.service';
 
 @Module({
   imports: [
@@ -34,10 +36,6 @@ import { SwaggerModule } from './core/swagger/swagger.module';
     SwaggerModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, RabbitMQService],
 })
-export class AppModule {
-  constructor(private readonly configService: ConfigService) {
-    console.log(`NODE_ENV: ${this.configService.get('NODE_ENV')}`);
-  }
-}
+export class AppModule {}
