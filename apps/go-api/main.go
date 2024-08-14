@@ -2,6 +2,7 @@ package main
 
 import (
 	"go-api/database"
+	"go-api/rabbitmq"
 	"log"
 	"os"
 	"time"
@@ -11,6 +12,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/helmet"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/streadway/amqp"
 )
 
 func main() {
@@ -38,13 +40,26 @@ func main() {
 		TimeZone:   "Local",
 	}))
 
+	rabbitMQService, err := rabbitmq.NewRabbitMQService("amqp://ledun:testledun2216@78.111.111.77:5672")
+	if err != nil {
+		log.Fatalf("Failed to connect to RabbitMQ: %s", err)
+	}
+	defer rabbitMQService.Close()
+
+	err = rabbitMQService.ConsumeMessages("main_queue", func(d amqp.Delivery) {
+		log.Printf("Received a message: %s", d.Body)
+	})
+	if err != nil {
+		log.Fatalf("Failed to start consuming messages: %s", err)
+	}
+
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, Fiber!")
 	})
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "6060" // Default port
+		port = "6060"
 	}
 
 	log.Fatal(app.Listen(":" + port))
