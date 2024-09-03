@@ -17,6 +17,7 @@ import { JwtService } from '@nestjs/jwt';
 import { LogoutResponseDto } from './dto/logoutResponse.dto';
 import * as requestIp from 'request-ip';
 import { Request } from 'express';
+import { RabbitMQService } from 'src/core/rabbitMQ/rabbitmq.service';
 
 @Injectable()
 export class AuthService {
@@ -25,6 +26,7 @@ export class AuthService {
     private readonly hashingService: HashingService,
     private readonly tokenService: TokenService,
     private readonly jwtService: JwtService,
+    private readonly rabbitMQService: RabbitMQService,
   ) {}
 
   async registerUserService(
@@ -92,6 +94,11 @@ export class AuthService {
 
       await this.createSession(user.id, accessToken, req);
 
+      await this.rabbitMQService.emitEvent('user_logged_in', {
+        userId: user.id,
+        email: user.email,
+      });
+
       return {
         accessToken,
         refreshToken,
@@ -124,6 +131,10 @@ export class AuthService {
       });
 
       await this.tokenService.blacklistToken(token);
+
+      await this.rabbitMQService.emitEvent('user_logged_out', {
+        userId: userId,
+      });
 
       return { message: 'Logout successful' };
     } catch (error) {

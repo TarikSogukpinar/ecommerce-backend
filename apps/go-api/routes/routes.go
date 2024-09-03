@@ -1,30 +1,29 @@
 package routes
 
 import (
+	"fmt"
 	"go-api/controllers"
 	"go-api/middlewares"
+	"go-api/rabbitmq"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
-func SetupRoutes(app *fiber.App) {
-	// Root route
+func SetupRoutes(app *fiber.App, db *gorm.DB, rabbitMQService *rabbitmq.RabbitMQService) {
+	secretKey := os.Getenv("JWT_SECRET")
+
+	fmt.Println(secretKey, "secretKey")
+
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("GoLang & Next.js!")
 	})
 
-	// Auth routes
 	api := app.Group("/api")
-	auth := api.Group("/auth")
-	auth.Post("/register", controllers.Register)
-	auth.Post("/login", controllers.Login)
-
-	// Protected routes (requires authentication)
-	protected := api.Group("/protected")
-	protected.Use(middlewares.AuthRequired())
-
-	// Book routes (requires authentication)
 	products := api.Group("/products")
-	products.Use(middlewares.AuthRequired()) // Applying Auth middleware to book routes
+	products.Use(middlewares.AuthRequired(secretKey, rabbitMQService))
 
+	productController := controllers.NewProductController(db)
+	products.Get("/", productController.GetProducts)
 }

@@ -35,6 +35,8 @@ import { Request } from 'express';
 import { Role } from '@prisma/client';
 import { JwtAuthGuard } from './guard/auth.guard';
 import { Roles } from './guard/role.guard';
+import { EventPattern, Payload, Ctx, RmqContext } from '@nestjs/microservices';
+import { JwtService } from '@nestjs/jwt';
 
 @Controller({ path: 'auth', version: '1' })
 @ApiTags('Auth')
@@ -46,8 +48,40 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
     private readonly tokenService: TokenService,
+    private readonly jwtService: JwtService,
   ) {
     this.redirectUrl = this.configService.get<string>('REDIRECT_URL');
+  }
+
+  @EventPattern('auth_queue')
+  async validateToken(@Payload() data: string, @Ctx() context: RmqContext) {
+    const channel = context.getChannelRef();
+    const originalMsg = context.getMessage();
+
+    try {
+      const decoded = this.jwtService.verify(data, {
+        secret: process.env.JWT_SECRET,
+      });
+      const response = 'true';
+      channel.sendToQueue(
+        originalMsg.properties.replyTo,
+        Buffer.from(response),
+        {
+          correlationId: originalMsg.properties.correlationId,
+        },
+      );
+    } catch (err) {
+      const response = 'false';
+      channel.sendToQueue(
+        originalMsg.properties.replyTo,
+        Buffer.from(response),
+        {
+          correlationId: originalMsg.properties.correlationId,
+        },
+      );
+    }
+
+    channel.ack(originalMsg);
   }
 
   @Post('register')
@@ -161,14 +195,5 @@ export class AuthController {
       message: 'Session terminated successfully',
       sessionId: terminatedSession.id,
     };
-  }
-
-  private async validateAndRedirect(jwt: string, res: any) {
-    try {
-      await this.tokenService.verifyToken(jwt);
-      return await res.redirect(`${this.redirectUrl}?JWT=${jwt}`);
-    } catch (error) {
-      throw new UnauthorizedException(ErrorCodes.InvalidToken);
-    }
   }
 }

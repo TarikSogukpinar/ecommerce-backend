@@ -1,8 +1,10 @@
 package main
 
 import (
+	"go-api/config"
 	"go-api/database"
 	"go-api/rabbitmq"
+	"go-api/routes"
 	"log"
 	"os"
 	"time"
@@ -16,6 +18,9 @@ import (
 )
 
 func main() {
+
+	config.LoadConfig()
+
 	app := fiber.New()
 
 	database.ConnectDB()
@@ -40,22 +45,25 @@ func main() {
 		TimeZone:   "Local",
 	}))
 
-	rabbitMQService, err := rabbitmq.NewRabbitMQService("amqp://ledun:testledun2216@78.111.111.77:5672")
+	rabbitMQURL := config.Get("RABBITMQ_URL")
+	rabbitMQQueue := config.Get("RABBITMQ_QUEUE")
+
+	rabbitMQService, err := rabbitmq.NewRabbitMQService(rabbitMQURL)
 	if err != nil {
 		log.Fatalf("Failed to connect to RabbitMQ: %s", err)
 	}
 	defer rabbitMQService.Close()
 
-	err = rabbitMQService.ConsumeMessages("main_queue", func(d amqp.Delivery) {
+	err = rabbitMQService.ConsumeMessages(rabbitMQQueue, func(d amqp.Delivery) {
 		log.Printf("Received a message: %s", d.Body)
+
 	})
 	if err != nil {
 		log.Fatalf("Failed to start consuming messages: %s", err)
 	}
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, Fiber!")
-	})
+	// Rotayı ayarlayın
+	routes.SetupRoutes(app, database.DB, rabbitMQService)
 
 	port := os.Getenv("PORT")
 	if port == "" {

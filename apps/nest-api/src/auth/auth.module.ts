@@ -9,6 +9,7 @@ import { PassportModule } from '@nestjs/passport';
 import { HashingModule } from 'src/utils/hashing/hashing.module';
 import { JwtModule } from '@nestjs/jwt';
 import { HttpModule } from '@nestjs/axios';
+import { RabbitMQService } from 'src/core/rabbitMQ/rabbitmq.service';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { HttpModule } from '@nestjs/axios';
     HttpModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, PrismaService, JwtStrategy],
+  providers: [AuthService, PrismaService, JwtStrategy, RabbitMQService],
   exports: [AuthService],
 })
 export class AuthModule {}
