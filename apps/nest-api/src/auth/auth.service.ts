@@ -3,6 +3,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
   ConflictException,
+  Inject,
 } from '@nestjs/common';
 import { PrismaService } from '../database/database.service';
 import { TokenService } from '../core/token/token.service';
@@ -17,7 +18,15 @@ import { JwtService } from '@nestjs/jwt';
 import { LogoutResponseDto } from './dto/logoutResponse.dto';
 import * as requestIp from 'request-ip';
 import { Request } from 'express';
-import { RabbitMQService } from 'src/core/rabbitMQ/rabbitmq.service';
+import {
+  ClientProxy,
+  Ctx,
+  EventPattern,
+  MessagePattern,
+  Payload,
+  RmqContext,
+} from '@nestjs/microservices';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class AuthService {
@@ -26,7 +35,7 @@ export class AuthService {
     private readonly hashingService: HashingService,
     private readonly tokenService: TokenService,
     private readonly jwtService: JwtService,
-    private readonly rabbitMQService: RabbitMQService,
+    @Inject('USER_SERVICE') private readonly client: ClientProxy,
   ) {}
 
   async registerUserService(
@@ -63,6 +72,7 @@ export class AuthService {
     }
   }
 
+  @EventPattern('token_created')
   async loginUserService(
     loginUserDto: LoginUserDto,
     req: Request,
@@ -94,11 +104,13 @@ export class AuthService {
 
       await this.createSession(user.id, accessToken, req);
 
-      await this.rabbitMQService.emitEvent('user_logged_in', {
-        userId: user.id,
-        email: user.email,
-      });
+      // const result = await this.client.emit('token_created', {
+      //   accessToken,
+      //   refreshToken,
+      //   email: user.email,
+      // });
 
+      // console.log(result)
       return {
         accessToken,
         refreshToken,
@@ -131,10 +143,6 @@ export class AuthService {
       });
 
       await this.tokenService.blacklistToken(token);
-
-      await this.rabbitMQService.emitEvent('user_logged_out', {
-        userId: userId,
-      });
 
       return { message: 'Logout successful' };
     } catch (error) {

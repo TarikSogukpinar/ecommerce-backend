@@ -1,12 +1,14 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"go-api/config"
 	"go-api/database"
-	"go-api/rabbitmq"
-	"go-api/routes"
 	"log"
+	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -14,8 +16,31 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/helmet"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/streadway/amqp"
 )
+
+type TokenPayload struct {
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
+	Email        string `json:"email"`
+}
+
+type Product struct {
+	ID    int    `json:"id"`
+	Name  string `json:"name"`
+	Price string `json:"price"`
+}
+
+// Fake ürün listesi
+var products = []Product{
+	{ID: 1, Name: "Product A", Price: "$10"},
+	{ID: 2, Name: "Product B", Price: "$20"},
+	{ID: 3, Name: "Product C", Price: "$30"},
+}
+
+// JWT doğrulama secret key (NestJS ile aynı olmalı)
+var jwtSecret = []byte("6583e4685e27a7cc1d977ab5f69a2dc7d10667aef4f0daa890da2473a4487b8cdbd179db194362a929f460e6fb47cb4b5c7a761cee2035129348145a2f653d9f")
 
 func main() {
 
@@ -45,25 +70,23 @@ func main() {
 		TimeZone:   "Local",
 	}))
 
-	rabbitMQURL := config.Get("RABBITMQ_URL")
-	rabbitMQQueue := config.Get("RABBITMQ_QUEUE")
+	// Ürünleri döndüren API route'u
+	app.Get("/api/products", productsHandler)
 
-	rabbitMQService, err := rabbitmq.NewRabbitMQService(rabbitMQURL)
+	conn, err := amqp.Dial("amqp://ledun:testledun2216@78.111.111.77:5672")
 	if err != nil {
-		log.Fatalf("Failed to connect to RabbitMQ: %s", err)
+		log.Fatalf("RabbitMQ'ya bağlanılamadı: %v", err)
 	}
-	defer rabbitMQService.Close()
+	defer conn.Close()
 
-	err = rabbitMQService.ConsumeMessages(rabbitMQQueue, func(d amqp.Delivery) {
-		log.Printf("Received a message: %s", d.Body)
-
-	})
+	// RabbitMQ kanalını oluştur
+	ch, err := conn.Channel()
 	if err != nil {
-		log.Fatalf("Failed to start consuming messages: %s", err)
+		log.Fatalf("RabbitMQ kanal hatası: %v", err)
 	}
+	defer ch.Close()
 
-	// Rotayı ayarlayın
-	routes.SetupRoutes(app, database.DB, rabbitMQService)
+	go consumeMessages(ch)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -71,4 +94,108 @@ func main() {
 	}
 
 	log.Fatal(app.Listen(":" + port))
+}
+
+// Ürünleri döndüren API handler
+func productsHandler(c *fiber.Ctx) error {
+	// Authorization başlığından token'ı al
+	authHeader := c.Get("Authorization")
+	if authHeader == "" {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
+			"error": "Authorization header gerekli",
+		})
+	}
+
+	// Bearer token'ı ayrıştır
+	tokenString := strings.Replace(authHeader, "Bearer ", "", 1)
+
+	// Token'ı doğrula
+	claims, err := validateToken(tokenString)
+	if err != nil {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
+			"error": "Geçersiz token: " + err.Error(),
+		})
+	}
+
+	// Token geçerliyse ürünleri döndür
+	log.Printf("Token geçerli, kullanıcı: %v", claims["id"])
+	return c.JSON(products)
+}
+
+// RabbitMQ mesajlarını dinle
+func consumeMessages(ch *amqp.Channel) {
+	// RabbitMQ kuyruğundan mesajları tüket
+	msgs, err := ch.Consume(
+		"token_created_queue", // Kuyruk adı
+		"",                    // Consumer adı, boş ise RabbitMQ random bir ad verir
+		true,                  // Auto-ack (otomatik olarak mesajları onayla)
+		false,                 // Exclusive
+		false,                 // No-local
+		false,                 // No-wait
+		nil,                   // Arguments
+	)
+	if err != nil {
+		log.Fatalf("Kuyruk mesajları alınamadı: %v", err)
+	}
+
+	forever := make(chan bool)
+
+	go func() {
+		for d := range msgs {
+			log.Printf("Gelen mesaj: %s", d.Body)
+
+			var payload TokenPayload
+			err := json.Unmarshal(d.Body, &payload)
+			if err != nil {
+				log.Printf("Mesaj ayrıştırma hatası: %s", err)
+				continue
+			}
+
+			log.Printf("Mesaj içeriği: %v", payload)
+
+			// Token doğrulama işlemi
+			claims, err := validateToken(payload.AccessToken)
+			if err != nil {
+				log.Println("Token geçersiz:", err)
+				continue
+			}
+
+			log.Printf("Token geçerli, kullanıcı: %v", claims["id"])
+
+			// Ürünleri işleme
+			for _, product := range products {
+				processProduct(product)
+			}
+		}
+	}()
+
+	log.Printf(" [*] RabbitMQ'dan mesajlar dinleniyor. Çıkmak için CTRL+C'ye basın.")
+	<-forever
+}
+
+// Token doğrulama işlemi
+func validateToken(tokenString string) (jwt.MapClaims, error) {
+	// Token'ı parse et ve doğrula
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return jwtSecret, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Token'dan claim'leri al
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return claims, nil
+	} else {
+		return nil, fmt.Errorf("token geçersiz")
+	}
+}
+
+// Ürün işleme fonksiyonu
+func processProduct(product Product) {
+	fmt.Printf("Ürün işlendi: %s - %s\n", product.Name, product.Price)
 }

@@ -7,7 +7,6 @@ import { PrismaModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
 import { SwaggerModule } from './core/swagger/swagger.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { RabbitMQService } from './core/rabbitMQ/rabbitmq.service';
 
 @Module({
   imports: [
@@ -32,10 +31,10 @@ import { RabbitMQService } from './core/rabbitMQ/rabbitmq.service';
       },
     ]),
     PrismaModule,
-    AuthModule,
     SwaggerModule,
+    AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService, RabbitMQService],
+  providers: [AppService],
 })
 export class AppModule {}

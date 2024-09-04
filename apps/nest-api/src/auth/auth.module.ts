@@ -9,7 +9,8 @@ import { PassportModule } from '@nestjs/passport';
 import { HashingModule } from 'src/utils/hashing/hashing.module';
 import { JwtModule } from '@nestjs/jwt';
 import { HttpModule } from '@nestjs/axios';
-import { RabbitMQService } from 'src/core/rabbitMQ/rabbitmq.service';
+import { HashingService } from 'src/utils/hashing/hashing.service';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [
@@ -22,9 +23,24 @@ import { RabbitMQService } from 'src/core/rabbitMQ/rabbitmq.service';
     TokenModule,
     PrismaModule,
     HttpModule,
+    HashingModule,
+    ClientsModule.register([
+      {
+        name: 'USER_SERVICE', // RabbitMQ istemcisini buraya ekliyoruz
+        transport: Transport.RMQ,
+        options: {
+          urls: ['amqp://ledun:testledun2216@78.111.111.77:5672'],
+          queue: 'token_created_queue',
+          queueOptions: {
+            durable: true, // Kuyruk kalıcı olmalı
+          },
+          // Burada exchange tanımlamadığınız için RabbitMQ doğrudan kuyruk ile çalışır.
+        },
+      },
+    ]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, PrismaService, JwtStrategy, RabbitMQService],
+  providers: [AuthService, PrismaService, JwtStrategy, HashingService],
   exports: [AuthService],
 })
 export class AuthModule {}

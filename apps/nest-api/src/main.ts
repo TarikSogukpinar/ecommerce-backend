@@ -12,6 +12,7 @@ import * as cookieParser from 'cookie-parser';
 
 import validationOptions from './utils/validate/validate-options';
 import { SwaggerService } from './core/swagger/swagger.service';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -40,6 +41,17 @@ async function bootstrap() {
       configService.get<string>('CORS_ORIGIN_LOCAL', { infer: true }),
     ],
     credentials: true,
+  });
+
+  await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
+    transport: Transport.RMQ,
+    options: {
+      urls: ['amqp://ledun:testledun2216@78.111.111.77:5672'],
+      queue: 'token_created_queue',
+      queueOptions: {
+        durable: false,
+      },
+    },
   });
 
   await app.listen(

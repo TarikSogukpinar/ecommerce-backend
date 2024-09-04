@@ -13,6 +13,7 @@ import {
   HttpStatus,
   Param,
   Delete,
+  Inject,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginUserDto } from './dto/loginUser.dto';
@@ -35,8 +36,15 @@ import { Request } from 'express';
 import { Role } from '@prisma/client';
 import { JwtAuthGuard } from './guard/auth.guard';
 import { Roles } from './guard/role.guard';
-import { EventPattern, Payload, Ctx, RmqContext } from '@nestjs/microservices';
+import {
+  EventPattern,
+  Payload,
+  Ctx,
+  RmqContext,
+  ClientProxy,
+} from '@nestjs/microservices';
 import { JwtService } from '@nestjs/jwt';
+import { config } from 'process';
 
 @Controller({ path: 'auth', version: '1' })
 @ApiTags('Auth')
@@ -49,39 +57,9 @@ export class AuthController {
     private readonly configService: ConfigService,
     private readonly tokenService: TokenService,
     private readonly jwtService: JwtService,
+    @Inject('USER_SERVICE') private readonly client: ClientProxy,
   ) {
     this.redirectUrl = this.configService.get<string>('REDIRECT_URL');
-  }
-
-  @EventPattern('auth_queue')
-  async validateToken(@Payload() data: string, @Ctx() context: RmqContext) {
-    const channel = context.getChannelRef();
-    const originalMsg = context.getMessage();
-
-    try {
-      const decoded = this.jwtService.verify(data, {
-        secret: process.env.JWT_SECRET,
-      });
-      const response = 'true';
-      channel.sendToQueue(
-        originalMsg.properties.replyTo,
-        Buffer.from(response),
-        {
-          correlationId: originalMsg.properties.correlationId,
-        },
-      );
-    } catch (err) {
-      const response = 'false';
-      channel.sendToQueue(
-        originalMsg.properties.replyTo,
-        Buffer.from(response),
-        {
-          correlationId: originalMsg.properties.correlationId,
-        },
-      );
-    }
-
-    channel.ack(originalMsg);
   }
 
   @Post('register')
@@ -96,6 +74,11 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async register(@Body() registerUserDto: RegisterUserDto) {
     const result = await this.authService.registerUserService(registerUserDto);
+
+    this.client.emit('token_created', {
+      result,
+    });
+
     return {
       message: 'Successfully register user!',
       result,
