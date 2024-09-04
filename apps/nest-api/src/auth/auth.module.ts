@@ -11,6 +11,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { HttpModule } from '@nestjs/axios';
 import { HashingService } from 'src/utils/hashing/hashing.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -24,18 +25,24 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
     PrismaModule,
     HttpModule,
     HashingModule,
-    ClientsModule.register([
+    ClientsModule.registerAsync([
       {
-        name: 'USER_SERVICE', // RabbitMQ istemcisini buraya ekliyoruz
-        transport: Transport.RMQ,
-        options: {
-          urls: ['amqp://ledun:testledun2216@78.111.111.77:5672'],
-          queue: 'token_created_queue',
-          queueOptions: {
-            durable: true, // Kuyruk kalıcı olmalı
+        name: 'USER_SERVICE',
+        imports: [ConfigModule],
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.RMQ,
+          options: {
+            urls: [configService.get<string>('RABBITMQ_URL')],
+            queue: configService.get<string>(
+              'RABBITMQ_QUEUE',
+              'token_created_queue',
+            ),
+            queueOptions: {
+              durable: true,
+            },
           },
-          // Burada exchange tanımlamadığınız için RabbitMQ doğrudan kuyruk ile çalışır.
-        },
+        }),
+        inject: [ConfigService],
       },
     ]),
   ],
