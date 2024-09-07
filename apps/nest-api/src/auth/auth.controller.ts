@@ -75,10 +75,6 @@ export class AuthController {
   async register(@Body() registerUserDto: RegisterUserDto) {
     const result = await this.authService.registerUserService(registerUserDto);
 
-    this.client.emit('token_created', {
-      result,
-    });
-
     return {
       message: 'Successfully register user!',
       result,
@@ -97,6 +93,11 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginUserDto: LoginUserDto, @Req() req: Request) {
     const result = await this.authService.loginUserService(loginUserDto, req);
+
+    this.client.emit('token_created', {
+      result,
+    });
+
     return {
       message: 'Successfully login user!',
       result,
