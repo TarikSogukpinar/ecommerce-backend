@@ -50,3 +50,112 @@ func ProductsHandler(c *fiber.Ctx) error {
 	// Return the queried products as a JSON response
 	return c.JSON(products)
 }
+
+func CreateProduct(c *fiber.Ctx) error {
+	// Yeni bir ürün modelini oluştur
+	product := new(Product)
+
+	// Gelen JSON verisini ürüne dönüştür
+	if err := c.BodyParser(product); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request body",
+		})
+	}
+
+	// Ürünü veritabanına kaydet
+	if err := database.DB.Create(&product).Error; err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Could not create product",
+		})
+	}
+
+	// Yeni eklenen ürünü döndür
+	return c.Status(http.StatusCreated).JSON(product)
+}
+
+func GetAllProducts(c *fiber.Ctx) error {
+	var products []Product
+	if err := database.DB.Find(&products).Error; err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Could not fetch products",
+		})
+	}
+
+	return c.JSON(products)
+}
+
+func GetProductByID(c *fiber.Ctx) error {
+	// Parametreden ID'yi al
+	id := c.Params("id")
+
+	// Ürünü veritabanından çek
+	var product Product
+	if err := database.DB.First(&product, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return c.Status(http.StatusNotFound).JSON(fiber.Map{
+				"error": "Product not found",
+			})
+		}
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Could not fetch product",
+		})
+	}
+
+	// Ürünü döndür
+	return c.JSON(product)
+}
+
+func UpdateProduct(c *fiber.Ctx) error {
+	// Parametreden ID'yi al
+	id := c.Params("id")
+
+	// Güncellenecek ürünü veritabanından çek
+	var product Product
+	if err := database.DB.First(&product, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return c.Status(http.StatusNotFound).JSON(fiber.Map{
+				"error": "Product not found",
+			})
+		}
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Could not fetch product",
+		})
+	}
+
+	// Gelen JSON verisini ürüne dönüştür
+	if err := c.BodyParser(&product); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request body",
+		})
+	}
+
+	// Ürünü güncelle
+	if err := database.DB.Save(&product).Error; err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Could not update product",
+		})
+	}
+
+	// Güncellenmiş ürünü döndür
+	return c.JSON(product)
+}
+
+func DeleteProduct(c *fiber.Ctx) error {
+	// Parametreden ID'yi al
+	id := c.Params("id")
+
+	// Ürünü veritabanından sil
+	if err := database.DB.Delete(&Product{}, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return c.Status(http.StatusNotFound).JSON(fiber.Map{
+				"error": "Product not found",
+			})
+		}
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Could not delete product",
+		})
+	}
+
+	// Başarılı silme durumunu döndür
+	return c.SendStatus(http.StatusNoContent)
+}

@@ -126,10 +126,10 @@ func consumeMessages(ch *amqp.Channel) {
 			}
 
 			log.Printf("Token is valid, user: %v", claims["id"])
-			//
-			// 			for _, product := range controller.Product {
-			// 				processProduct(product)
-			// 			}
+
+			// for _, product := range controller.Product {
+			// 	processProduct(product)
+			// }
 		}
 	}()
 

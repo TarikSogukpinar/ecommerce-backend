@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Markdoc from '@markdoc/markdoc';
 
 export default function Home() {
   return (

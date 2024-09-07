@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-     "dev": "go run main.go"
+    "dev": "go build main.go",
+    "build": "go build -o dist/main main.go"
   },
   "keywords": [],
   "author": "",
