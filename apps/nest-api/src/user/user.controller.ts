@@ -31,6 +31,7 @@ import { GetAllUsersPaginationDto } from './dto/getAllUsersPagination.dto';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from './guards/auth.guard';
 import { GetUserByUuidDto } from './dto/getUserUuid.dto';
+import { InvalidUUIDException } from 'src/core/handler/expcetions/custom-expection';
 
 @Controller({ path: 'user', version: '1' })
 @ApiTags('Users')
@@ -113,12 +114,11 @@ export class UserController {
     @Body() updateUserDto: UpdateUserDto,
     @Req() req: CustomRequest,
   ) {
-    const userId = parseInt(id, 10);
-    if (req.user?.id !== userId) {
-      throw new UnauthorizedException('You can only update your own profile');
-    }
-
-    return this.userService.updateUser(userId, updateUserDto);
+    const result = await this.userService.updateUser(id, updateUserDto);
+    return {
+      message: 'User updated successfully',
+      result,
+    };
   }
 
   @Put(':id/password')

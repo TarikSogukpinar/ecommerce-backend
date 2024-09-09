@@ -21,18 +21,23 @@ enum Role {
 }
 
 model User {
-  id                String    @id @default(cuid())
-  uuid              String    @unique @default(uuid())
-  email             String    @unique
+  id                String            @id @default(cuid())
+  uuid              String            @unique @default(uuid())
+  email             String            @unique
   image             String?
   name              String?
+  isActiveAccount   Boolean           @default(false)
   password          String
   refreshToken      String?
   accessToken       String?
   resetToken        String?
   resetTokenExpires DateTime?
-  role              Role      @default(USER)
+  role              Role              @default(USER)
   Session           Session[]
+  PasswordHistory   PasswordHistory[]
+  ProfileImage      ProfileImage[]
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 
   @@index([email])
   @@index([role])
@@ -62,4 +67,28 @@ model BlacklistedToken {
   createdAt DateTime @default(now())
 
   @@index([expiresAt])
+}
+
+model ProfileImage {
+  id        String   @id @default(cuid())
+  userId    String
+  uuid      String   @unique @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  imageUrl  String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([imageUrl])
+  @@map("profileImages")
+}
+
+model PasswordHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  password  String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("passwordHistory")
 }
