@@ -127,16 +127,8 @@ func consumeMessages(ch *amqp.Channel) {
 
 			log.Printf("Token is valid, user: %v", claims["id"])
 
-			// for _, product := range controller.Product {
-			// 	processProduct(product)
-			// }
 		}
 	}()
 
 	<-forever
 }
-
-// // Process product information (for RabbitMQ consumer)
-// func processProduct(product controller.Product) {
-// 	fmt.Printf("Products: %s - %s\n", product.Name, product.Price)
-// }

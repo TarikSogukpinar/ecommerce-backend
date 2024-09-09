@@ -18,14 +18,7 @@ import { JwtService } from '@nestjs/jwt';
 import { LogoutResponseDto } from './dto/logoutResponse.dto';
 import * as requestIp from 'request-ip';
 import { Request } from 'express';
-import {
-  ClientProxy,
-  Ctx,
-  EventPattern,
-  MessagePattern,
-  Payload,
-  RmqContext,
-} from '@nestjs/microservices';
+import { ClientProxy, EventPattern } from '@nestjs/microservices';
 
 @Injectable()
 export class AuthService {
@@ -274,4 +267,6 @@ export class AuthService {
       );
     }
   }
+
+  
 }
