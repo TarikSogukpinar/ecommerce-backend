@@ -27,7 +27,7 @@ model User {
   image             String?
   name              String?
   isActiveAccount   Boolean           @default(false)
-  password          String
+  password          String?
   refreshToken      String?
   accessToken       String?
   resetToken        String?

@@ -1,43 +1,39 @@
-import clsx from 'clsx';
-import Heading from '@theme/Heading';
-import styles from './styles.module.css';
+import clsx from "clsx";
+import Heading from "@theme/Heading";
+import styles from "./styles.module.css";
 
 const FeatureList = [
   {
-    title: 'Simple Usage',
-    Svg: require('@site/static/img/icon1.svg').default,
+    title: "Simple Usage",
+    Svg: require("@site/static/img/icon1.svg").default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Mock API provides a fast and secure API for your e-commerce
+        applications. You can see the results in seconds.
       </>
     ),
   },
   {
-    title: 'E-commerce API diversity',
-    Svg: require('@site/static/img/icon2.svg').default,
+    title: "E-commerce API diversity",
+    Svg: require("@site/static/img/icon2.svg").default,
     description: (
-      <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
-      </>
+      <>API options created for many scenarios for your e-commerce project</>
     ),
   },
   {
-    title: 'Powered by  Go & Nest.js',
-    Svg: require('@site/static/img/icon3.svg').default,
+    title: "Powered by  Go & Nest.js and CockroachDB",
+    Svg: require("@site/static/img/icon3.svg").default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        This application is built with Go, Node and Cockroach Database.
       </>
     ),
   },
 ];
 
-function Feature({Svg, title, description}) {
+function Feature({ Svg, title, description }) {
   return (
-    <div className={clsx('col col--4')}>
+    <div className={clsx("col col--4")}>
       <div className="text--center">
         <Svg className={styles.featureSvg} role="img" />
       </div>

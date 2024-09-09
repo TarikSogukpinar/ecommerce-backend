@@ -70,31 +70,35 @@ export class AuthService {
     req: Request,
   ): Promise<LoginResponseDto> {
     try {
-      const { email, password } = loginUserDto;
+      const { email } = loginUserDto;
 
-      const user = await this.prismaService.user.findUnique({
+      // Check if the user exists
+      let user = await this.prismaService.user.findUnique({
         where: { email },
       });
 
-      if (!user) throw new NotFoundException(ErrorCodes.UserNotFound);
+      // If the user does not exist, create a new one
+      if (!user) {
+        user = await this.prismaService.user.create({
+          data: {
+            email,
+            role: 'USER', // Assign a default role (optional)
+          },
+        });
+      }
 
-      const isPasswordValid = await this.hashingService.comparePassword(
-        password,
-        user.password,
-      );
-
-      if (!isPasswordValid)
-        throw new NotFoundException(ErrorCodes.InvalidCredentials);
-
+      // Generate JWT tokens for the user
       const accessToken = await this.tokenService.createAccessToken(user);
       const refreshToken = await this.tokenService.createRefreshToken(user);
 
+      // Update user with the access token (optional)
       await this.prismaService.user.update({
         where: { id: user.id },
         data: { accessToken: accessToken },
       });
 
-      await this.createSession(user.id, accessToken, req);
+      // Optionally create a session for tracking login (if you want)
+      // await this.createSession(user.id, accessToken, req);
 
       return {
         accessToken,
@@ -267,6 +271,4 @@ export class AuthService {
       );
     }
   }
-
-  
 }

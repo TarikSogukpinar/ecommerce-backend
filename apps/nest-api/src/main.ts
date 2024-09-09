@@ -36,12 +36,11 @@ async function bootstrap() {
   const PORT = configService.get<string>('API_PORT', { infer: true });
 
   app.enableCors({
-    origin: [
-      configService.get<string>('CORS_ORIGIN', { infer: true }),
-      configService.get<string>('CORS_ORIGIN_LOCAL', { infer: true }),
-    ],
-    credentials: true,
+    origin: '*', // You can specify a specific origin here, or allow all by using '*'
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: 'Content-Type, Authorization',
   });
+
 
   await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
     transport: Transport.RMQ,
