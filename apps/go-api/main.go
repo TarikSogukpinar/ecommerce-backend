@@ -61,6 +61,7 @@ func main() {
 
 	// Register routes: handle products
 	app.Get("/api/products", controller.ProductsHandler)
+	app.Post("/api/products", controller.CreateProduct)
 
 	// RabbitMQ connection
 	conn, err := amqp.Dial(os.Getenv("RABBITMQ_URL"))

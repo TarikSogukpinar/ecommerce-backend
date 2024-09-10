@@ -1,6 +1,36 @@
 import React, { useState } from "react";
 
-// Basit bir Spinner bileşeni
+// Basit bir Alert bileşeni
+const Alert = ({ message, onClose }) => (
+  <div
+    style={{
+      backgroundColor: "#f8d7da",
+      color: "#721c24",
+      padding: "10px",
+      borderRadius: "5px",
+      margin: "20px 0",
+      position: "relative",
+    }}
+  >
+    <span>{message}</span>
+    <button
+      onClick={onClose}
+      style={{
+        position: "absolute",
+        right: "10px",
+        top: "10px",
+        background: "none",
+        border: "none",
+        fontWeight: "bold",
+        fontSize: "16px",
+        cursor: "pointer",
+      }}
+    >
+      &times;
+    </button>
+  </div>
+);
+
 const Spinner = () => (
   <div style={{ textAlign: "center", marginTop: "20px" }}>
     <div
@@ -82,14 +112,19 @@ export default function TryApiExample({ apiEndpoint, token }) {
       </button>
 
       {loading && <Spinner />}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && (
+        <Alert
+          message={error}
+          onClose={() => setError(null)} // Alert'ı kapatma fonksiyonu
+        />
+      )}
 
       {responseDetails && !loading && (
         <div style={{ marginTop: "20px" }}>
           <h3>Response Details:</h3>
           <p>Status: {responseDetails.status}</p>
           <p>Status Text: {responseDetails.statusText}</p>
-          <p>Response Time: {responseDetails.responseTime} ms</p>
+          <p>Response Time: {responseDetails.responseTime} ms (Average)</p>
         </div>
       )}
 

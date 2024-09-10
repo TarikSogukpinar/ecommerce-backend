@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go-api/database"
 	"go-api/middleware"
+	"log"
 	"net/http"
 	"strings"
 
@@ -52,11 +53,15 @@ func ProductsHandler(c *fiber.Ctx) error {
 }
 
 func CreateProduct(c *fiber.Ctx) error {
-	// Yeni bir ürün modelini oluştur
 	product := new(Product)
 
-	// Gelen JSON verisini ürüne dönüştür
+	// Gelen isteği loglayın
+	body := c.Body()
+	log.Println("Received Body:", string(body)) // Gelen body'yi loglar
+
+	// JSON verisini parse edin
 	if err := c.BodyParser(product); err != nil {
+		log.Println("BodyParser Error:", err) // Parse hatasını loglar
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid request body",
 		})
@@ -64,12 +69,13 @@ func CreateProduct(c *fiber.Ctx) error {
 
 	// Ürünü veritabanına kaydet
 	if err := database.DB.Create(&product).Error; err != nil {
+		log.Println("Database Error:", err) // Veritabanı hatasını loglar
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Could not create product",
 		})
 	}
 
-	// Yeni eklenen ürünü döndür
+	// Yeni ürünü döndür
 	return c.Status(http.StatusCreated).JSON(product)
 }
 
