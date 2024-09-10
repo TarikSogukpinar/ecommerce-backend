@@ -1,39 +1,51 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-const TryApi = ({ apiEndpoint }) => {
-  const [response, setResponse] = useState(null);
-  const [loading, setLoading] = useState(false);
+export default function TryApi({ apiEndpoint, token }) {
+  const [userData, setUserData] = useState(null);
   const [error, setError] = useState(null);
 
-  const fetchData = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(apiEndpoint);
-      const data = await res.json();
-      setResponse(data);
-    } catch (err) {
-      setError("Failed to fetch API data");
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch(apiEndpoint, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`, // Bearer Token header'a ekleniyor
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch user data");
+        }
+
+        const data = await response.json();
+        setUserData(data);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
+    if (token) {
+      fetchUserData();
     }
-  };
+  }, [apiEndpoint, token]);
+
+  if (error) {
+    return <p style={{ color: "red" }}>Error: {error}</p>;
+  }
 
   return (
     <div>
-      {loading ? (
-        <div className="spinner"></div> // Spinner while loading
-      ) : error ? (
-        <p style={{ color: "red" }}>{error}</p>
-      ) : response ? (
-        <pre>{JSON.stringify(response, null, 2)}</pre>
+      {userData ? (
+        <div>
+          <h3>User Info</h3>
+          <p>Name: {userData.name}</p>
+          <p>Email: {userData.email}</p>
+        </div>
       ) : (
-        <button className="try-api-button" onClick={fetchData}>
-          Try API
-        </button>
+        <p>Loading user data...</p>
       )}
     </div>
   );
-};
-
-export default TryApi;
+}

@@ -57,22 +57,18 @@ export class UserController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Get current user profile' })
-  @ApiResponse({ status: 200, description: 'User retrieved successfully' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @HttpCode(HttpStatus.OK)
+  // @ApiOperation({ summary: 'Get current user profile' })
+  // @ApiResponse({ status: 200, description: 'User retrieved successfully' })
+  // @ApiResponse({ status: 401, description: 'Unauthorized' })
+  // @HttpCode(HttpStatus.OK)
   async getCurrentUser(@Req() req: CustomRequest) {
     const userUuid = req.user?.uuid;
 
-    if (!userUuid) {
-      throw new NotFoundException(ErrorCodes.InvalidCredentials);
-    }
+    if (!userUuid) throw new NotFoundException(ErrorCodes.InvalidCredentials);
 
     const result = await this.userService.getUserByUuid(userUuid);
 
-    if (!result) {
-      throw new NotFoundException(ErrorCodes.UserNotFound);
-    }
+    if (!result) throw new NotFoundException(ErrorCodes.UserNotFound);
 
     return { message: 'User Information retrieved successfully', result };
   }

@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { PrismaModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
 import { SwaggerModule } from './core/swagger/swagger.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -29,11 +28,12 @@ import { SwaggerModule } from './core/swagger/swagger.module';
         limit: 10,
       },
     ]),
+    AuthModule,
+    UserModule,
     PrismaModule,
     SwaggerModule,
-    AuthModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

@@ -40,30 +40,42 @@ const TryEmailForm = ({ apiEndpoint, onTokenGenerated }) => {
   };
 
   return (
-    <div>
+    <div
+      style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+    >
       <input
         type="email"
         placeholder="Enter your email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        style={{ padding: "10px", marginRight: "10px", fontSize: "16px" }}
+        style={{
+          padding: "12px 15px",
+          width: "100%",
+          maxWidth: "400px",
+          fontSize: "16px",
+          border: "2px solid #ccc",
+          borderRadius: "8px",
+          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+          marginBottom: "15px",
+        }}
       />
       <button
         onClick={fetchToken}
         style={{
-          padding: "10px 20px",
-          backgroundColor: "#007bff",
+          padding: "12px 20px",
+          backgroundColor: loading || !email ? "#cccccc" : "#007bff",
           color: "#fff",
           border: "none",
-          borderRadius: "5px",
+          borderRadius: "8px",
           fontSize: "16px",
-          cursor: "pointer",
+          cursor: loading || !email ? "not-allowed" : "pointer",
+          transition: "background-color 0.3s ease",
         }}
         disabled={loading || !email}
       >
         {loading ? "Generating..." : "Get Token"}
       </button>
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p style={{ color: "red", marginTop: "10px" }}>{error}</p>}
     </div>
   );
 };
