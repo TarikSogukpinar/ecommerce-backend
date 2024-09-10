@@ -45,16 +45,14 @@ export class TokenService {
       id: user.id,
     };
     return this.jwtService.sign(payload, {
-      secret: this.configService.get<string>('JWT_SECRET'),
-      expiresIn: this.configService.get<string>('JWT_EXPIRES_IN'),
+      noTimestamp: true
     });
   }
 
   async createRefreshToken(user: User) {
     const payload = { email: user.email };
     return this.jwtService.sign(payload, {
-      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-      expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN'),
+      noTimestamp: true
     });
   }
 

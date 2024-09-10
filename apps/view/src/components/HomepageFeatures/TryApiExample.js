@@ -1,28 +1,114 @@
 import React, { useState } from "react";
-import TryEmailForm from "@site/src/components/HomepageFeatures/TryEmailForm";
-import TryApi from "@site/src/components/HomepageFeatures/TryApi";
 
-export default function TryApiExample() {
-  const [token, setToken] = useState(null);
+// Basit bir Spinner bileşeni
+const Spinner = () => (
+  <div style={{ textAlign: "center", marginTop: "20px" }}>
+    <div
+      style={{
+        border: "4px solid rgba(0, 0, 0, 0.1)",
+        width: "36px",
+        height: "36px",
+        borderRadius: "50%",
+        borderTopColor: "#000000",
+        animation: "spin 1s ease-in-out infinite",
+      }}
+    />
+    <style>{`
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    `}</style>
+  </div>
+);
+
+export default function TryApiExample({ apiEndpoint, token }) {
+  const [userData, setUserData] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [responseDetails, setResponseDetails] = useState(null);
+
+  const fetchUserData = async () => {
+    setError(null);
+    setLoading(true);
+    setResponseDetails(null);
+    const startTime = new Date().getTime();
+
+    try {
+      const response = await fetch(apiEndpoint, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+
+      const endTime = new Date().getTime();
+      const responseTime = endTime - startTime;
+
+      setResponseDetails({
+        status: response.status,
+        statusText: response.statusText,
+        responseTime,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch data: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      setUserData(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div>
-      <h2>Step 1: Generate a JWT Token</h2>
-      {/* Email formu ile token alınacak */}
-      <TryEmailForm
-        apiEndpoint="http://localhost:3015/api/v1/auth/login"
-        onTokenGenerated={setToken}
-      />
+      <button
+        onClick={fetchUserData}
+        style={{
+          padding: "10px 20px",
+          backgroundColor: "#000000",
+          color: "#fff",
+          border: "none",
+          borderRadius: "5px",
+          fontSize: "16px",
+          cursor: "pointer",
+        }}
+      >
+        Try it API
+      </button>
 
-      {token && (
-        <>
-          <h2>Step 2: Fetch User Data with Your Token</h2>
-          {/* Alınan token ile başka bir API'yi çağırma */}
-          <TryApi
-            apiEndpoint="http://localhost:3015/api/v1/user/me"
-            token={token}
-          />
-        </>
+      {loading && <Spinner />}
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
+      {responseDetails && !loading && (
+        <div style={{ marginTop: "20px" }}>
+          <h3>Response Details:</h3>
+          <p>Status: {responseDetails.status}</p>
+          <p>Status Text: {responseDetails.statusText}</p>
+          <p>Response Time: {responseDetails.responseTime} ms</p>
+        </div>
+      )}
+
+      {userData && !loading && (
+        <div style={{ marginTop: "20px" }}>
+          <h3>Response Data:</h3>
+          <pre
+            style={{
+              backgroundColor: "#000000",
+              padding: "10px",
+              borderRadius: "5px",
+              whiteSpace: "pre-wrap",
+              wordWrap: "break-word",
+              color: "#fff",
+            }}
+          >
+            {JSON.stringify(userData, null, 2)}
+          </pre>
+        </div>
       )}
     </div>
   );

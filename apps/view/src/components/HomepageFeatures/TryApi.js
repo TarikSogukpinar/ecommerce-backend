@@ -10,7 +10,6 @@ export default function TryApi({ apiEndpoint, token }) {
         const response = await fetch(apiEndpoint, {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`, // Bearer Token header'a ekleniyor
             "Content-Type": "application/json",
           },
         });
@@ -40,8 +39,12 @@ export default function TryApi({ apiEndpoint, token }) {
       {userData ? (
         <div>
           <h3>User Info</h3>
-          <p>Name: {userData.name}</p>
-          <p>Email: {userData.email}</p>
+          <p>
+            <strong>Name:</strong> {userData.name}
+          </p>
+          <p>
+            <strong>Email:</strong> {userData.email}
+          </p>
         </div>
       ) : (
         <p>Loading user data...</p>

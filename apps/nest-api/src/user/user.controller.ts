@@ -32,6 +32,7 @@ import { UserService } from './user.service';
 import { JwtAuthGuard } from './guards/auth.guard';
 import { GetUserByUuidDto } from './dto/getUserUuid.dto';
 import { InvalidUUIDException } from 'src/core/handler/expcetions/custom-expection';
+import { OptionalJwtAuthGuard } from './guards/optionalAuth.guard';
 
 @Controller({ path: 'user', version: '1' })
 @ApiTags('Users')
@@ -44,7 +45,7 @@ export class UserController {
   ) {}
 
   @Get('users')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'Users retrieved successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -56,15 +57,18 @@ export class UserController {
   }
 
   @Get('me')
-  @UseGuards(JwtAuthGuard)
-  // @ApiOperation({ summary: 'Get current user profile' })
-  // @ApiResponse({ status: 200, description: 'User retrieved successfully' })
-  // @ApiResponse({ status: 401, description: 'Unauthorized' })
-  // @HttpCode(HttpStatus.OK)
+  @UseGuards(OptionalJwtAuthGuard)
+  @ApiOperation({ summary: 'Get current user profile' })
+  @ApiResponse({ status: 200, description: 'User retrieved successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @HttpCode(HttpStatus.OK)
   async getCurrentUser(@Req() req: CustomRequest) {
     const userUuid = req.user?.uuid;
 
-    if (!userUuid) throw new NotFoundException(ErrorCodes.InvalidCredentials);
+    if (!userUuid) {
+      // Token yoksa anonim olarak işlem yapılır, buradaki mantığınızı ayarlayabilirsiniz.
+      throw new NotFoundException(ErrorCodes.InvalidCredentials);
+    }
 
     const result = await this.userService.getUserByUuid(userUuid);
 
@@ -72,7 +76,7 @@ export class UserController {
 
     return { message: 'User Information retrieved successfully', result };
   }
-
+  
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get user by ID' })
