@@ -10,5 +10,13 @@
   "sidebar.tutorialSidebar.category.Tutorial - Basics.link.generated-index.description": {
     "message": "5 minutes to learn the most important Docusaurus concepts.",
     "description": "The generated-index page description for category Tutorial - Basics in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.API Examples": {
+    "message": "API Examples",
+    "description": "The label for category API Examples in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.API Examples.link.generated-index.description": {
+    "message": "5 minutes to learn the most important Docusaurus concepts.",
+    "description": "The generated-index page description for category API Examples in sidebar tutorialSidebar"
   }
 }

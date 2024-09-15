@@ -7,7 +7,7 @@ services:
       - "6070:6070"
 
   docs:
-    build: ./apps/docs
+    build: ./apps/view
     ports:
       - "6000:6000"
 

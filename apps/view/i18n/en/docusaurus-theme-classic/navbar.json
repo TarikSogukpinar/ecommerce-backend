@@ -18,5 +18,9 @@
   "item.label.Buy me Coffee": {
     "message": "Buy me Coffee",
     "description": "Navbar item with label Buy me Coffee"
+  },
+  "item.label.Buy me Coffe": {
+    "message": "Buy me Coffe",
+    "description": "Navbar item with label Buy me Coffe"
   }
 }
