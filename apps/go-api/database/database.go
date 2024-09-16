@@ -11,7 +11,6 @@ import (
 
 var DB *gorm.DB
 
-// ConnectDB initializes the database connection and assigns it to the global variable
 func ConnectDB() {
 
 	err := godotenv.Load()
@@ -19,10 +18,8 @@ func ConnectDB() {
 		log.Fatal("Error loading .env file")
 	}
 
-	// Veritabanı bağlantı URL'sini çevresel değişkenden al
 	dsn := os.Getenv("DATABASE_URL")
 
-	// Veritabanına bağlan
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)

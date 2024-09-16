@@ -71,23 +71,19 @@ export class AuthService {
   ): Promise<LoginResponseDto> {
     try {
       const { email } = loginUserDto;
-
-      // Check if the user exists
+      
       let user = await this.prismaService.user.findUnique({
         where: { email },
       });
 
-      // If the user does not exist, create a new one
       if (!user) {
         user = await this.prismaService.user.create({
           data: {
             email,
-            role: 'USER', // Assign a default role (optional)
+            role: 'USER',
           },
         });
       }
-
-      // Generate JWT tokens for the user
       const accessToken = await this.tokenService.createAccessToken(user);
       const refreshToken = await this.tokenService.createRefreshToken(user);
 
@@ -97,8 +93,6 @@ export class AuthService {
         data: { accessToken: accessToken },
       });
 
-      // Optionally create a session for tracking login (if you want)
-      // await this.createSession(user.id, accessToken, req);
 
       return {
         accessToken,

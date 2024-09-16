@@ -66,7 +66,6 @@ export class UserController {
     const userUuid = req.user?.uuid;
 
     if (!userUuid) {
-      // Token yoksa anonim olarak işlem yapılır, buradaki mantığınızı ayarlayabilirsiniz.
       throw new NotFoundException(ErrorCodes.InvalidCredentials);
     }
 
