@@ -16,7 +16,7 @@ import {
   Inject,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginUserDto } from './dto/loginUser.dto';
+import { LoginUserDto } from './dto/requests/loginUser.dto';
 import {
   ApiTags,
   ApiOperation,
@@ -25,11 +25,11 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { CustomRequest } from '../core/request/customRequest';
-import { RegisterUserDto } from './dto/registerUser.dto';
-import { LogoutDto } from './dto/logout.dto';
+import { RegisterUserDto } from './dto/requests/registerUser.dto';
+import { LogoutDto } from './dto/requests/logout.dto';
 import { ErrorCodes } from 'src/core/handler/error/error-codes';
 import { AuthGuard } from '@nestjs/passport';
-import { LogoutResponseDto } from './dto/logoutResponse.dto';
+import { LogoutResponseDto } from './dto/responses/logoutResponse.dto';
 import { ConfigService } from '@nestjs/config';
 import { TokenService } from 'src/core/token/token.service';
 import { Request } from 'express';
@@ -91,10 +91,8 @@ export class AuthController {
   @ApiBody({ type: LoginUserDto })
   @UsePipes(new ValidationPipe({ transform: true }))
   @HttpCode(HttpStatus.OK)
-  async login(@Body() loginUserDto: LoginUserDto, @Req() req: Request) {
-    const result = await this.authService.loginUserService(loginUserDto, req);
-
-    console.log('result', result);
+  async login(@Body() loginUserDto: LoginUserDto) {
+    const result = await this.authService.loginUserService(loginUserDto);
 
     this.client.emit('token_created', {
       result,
@@ -111,7 +109,6 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: 'Successfully logout',
-    type: LogoutResponseDto,
   })
   @ApiBody({ type: LogoutDto })
   @UseGuards(JwtAuthGuard)

@@ -7,15 +7,15 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../database/database.service';
 import { TokenService } from '../core/token/token.service';
-import { RegisterResponseDto } from './dto/registerResponse.dto';
+import { RegisterResponseDto } from './dto/responses/registerResponse.dto';
 import { User } from '@prisma/client';
-import { LoginUserDto } from './dto/loginUser.dto';
+import { LoginUserDto } from './dto/requests/loginUser.dto';
 import { ErrorCodes } from 'src/core/handler/error/error-codes';
-import { RegisterUserDto } from './dto/registerUser.dto';
-import { LoginResponseDto } from './dto/loginResponse.dto';
+import { RegisterUserDto } from './dto/requests/registerUser.dto';
+import { LoginResponseDto } from './dto/responses/loginResponse.dto';
 import { HashingService } from 'src/utils/hashing/hashing.service';
 import { JwtService } from '@nestjs/jwt';
-import { LogoutResponseDto } from './dto/logoutResponse.dto';
+import { LogoutResponseDto } from './dto/responses/logoutResponse.dto';
 import * as requestIp from 'request-ip';
 import { Request } from 'express';
 import { ClientProxy, EventPattern } from '@nestjs/microservices';
@@ -67,11 +67,10 @@ export class AuthService {
   @EventPattern('token_created')
   async loginUserService(
     loginUserDto: LoginUserDto,
-    req: Request,
   ): Promise<LoginResponseDto> {
     try {
       const { email } = loginUserDto;
-      
+
       let user = await this.prismaService.user.findUnique({
         where: { email },
       });
@@ -92,7 +91,6 @@ export class AuthService {
         where: { id: user.id },
         data: { accessToken: accessToken },
       });
-
 
       return {
         accessToken,
@@ -127,7 +125,7 @@ export class AuthService {
 
       await this.tokenService.blacklistToken(token);
 
-      return { message: 'Logout successful' };
+      return { message: 'User logged out successfully' };
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException(

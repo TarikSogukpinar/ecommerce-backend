@@ -20,17 +20,17 @@ import {
 } from '@nestjs/common';
 import { CustomRequest } from 'src/core/request/customRequest';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { UpdateUserDto } from './dto/updateUser.dto';
-import { ChangePasswordDto } from './dto/changePassword.dto';
+import { UpdateUserDto } from './dto/requests/updateUser.dto';
+import { ChangePasswordDto } from './dto/requests/changePassword.dto';
 import { ErrorCodes } from 'src/core/handler/error/error-codes';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from 'src/utils/upload/upload.service';
 import { MailService } from 'src/core/mail/mail.service';
 import { PasswordResetService } from 'src/core/password-reset/password-reset.service';
-import { GetAllUsersPaginationDto } from './dto/getAllUsersPagination.dto';
+import { GetAllUsersPaginationDto } from './dto/requests/getAllUsersPagination.dto';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from './guards/auth.guard';
-import { GetUserByUuidDto } from './dto/getUserUuid.dto';
+import { GetUserByUuidDto } from './dto/requests/getUserUuid.dto';
 import { InvalidUUIDException } from 'src/core/handler/expcetions/custom-expection';
 import { OptionalJwtAuthGuard } from './guards/optionalAuth.guard';
 

@@ -29,10 +29,8 @@ type Message struct {
 }
 
 func main() {
-	// Load configuration and initialize environment variables
 	config.LoadConfig()
 
-	// Create Fiber app instance
 	app := fiber.New()
 
 	app.Use(cors.New(cors.Config{
@@ -42,7 +40,6 @@ func main() {
 		AllowCredentials: true,
 	}))
 
-	// Connect to the database
 	database.ConnectDB()
 
 	app.Use(limiter.New(limiter.Config{
@@ -50,17 +47,14 @@ func main() {
 		Expiration: 30 * time.Second,
 	}))
 
-	// Middleware for security headers
 	app.Use(helmet.New())
 
-	// Middleware for logging requests
 	app.Use(logger.New(logger.Config{
 		Format:     "[${time}] ${status} - ${method} ${path}\n",
 		TimeFormat: "02-Jan-2006",
 		TimeZone:   "Local",
 	}))
 
-	// Register routes: handle products
 	app.Get("/api/products", controller.ProductsHandler)
 	app.Post("/api/products", controller.CreateProduct)
 

@@ -6,13 +6,13 @@ import {
   UserNotFoundException,
 } from 'src/core/handler/expcetions/custom-expection';
 import { PrismaService } from 'src/database/database.service';
-import { GetAllUsersPaginationDto } from './dto/getAllUsersPagination.dto';
-import { GetAllUsersResponseDto } from './dto/getAllUsersResponse.dto';
+import { GetAllUsersPaginationDto } from './dto/requests/getAllUsersPagination.dto';
+import { GetAllUsersResponseDto } from './dto/responses/getAllUsersResponse.dto';
 import { Prisma, User } from '@prisma/client';
 import { HashingService } from 'src/utils/hashing/hashing.service';
-import { ChangePasswordDto } from './dto/changePassword.dto';
-import { GetUserUUIDResponseDto } from './dto/getUserUuidResponse.dto';
-import { UpdateUserAccountStatusResponseDto } from './dto/updateUserAccountStatusResponse.dto';
+import { ChangePasswordDto } from './dto/requests/changePassword.dto';
+import { GetUserUUIDResponseDto } from './dto/responses/getUserUuidResponse.dto';
+import { UpdateUserAccountStatusResponseDto } from './dto/responses/updateUserAccountStatusResponse.dto';
 
 @Injectable()
 export class UserService {

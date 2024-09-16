@@ -113,3 +113,9 @@ export class NoActiveSessionsFoundException extends HttpException {
     super('No active sessions found', HttpStatus.NOT_FOUND);
   }
 }
+
+export class NoAddressesFoundForUserException extends HttpException {
+  constructor() {
+    super('No addresses found for this user', HttpStatus.NOT_FOUND);
+  }
+}
