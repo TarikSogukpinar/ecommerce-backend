@@ -36,12 +36,45 @@ model User {
   Session           Session[]
   PasswordHistory   PasswordHistory[]
   ProfileImage      ProfileImage[]
+  Address           Address[]
+  Preferences       Preferences[]
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
 
   @@index([email])
   @@index([role])
-  @@index([name])
+  @@map("users")
+}
+
+model Address {
+  id          String   @id @default(cuid())
+  uuid        String   @unique @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  addressLine String
+  city        String
+  state       String
+  postalCode  String
+  country     String
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@map("addresses")
+}
+
+model Preferences {
+  id                     String   @id @default(cuid())
+  userId                 String
+  user                   User     @relation(fields: [userId], references: [id])
+  emailNotifications     Boolean  @default(true)
+  productRecommendations Boolean  @default(true)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  @@index([userId])
+  @@map("preferences")
 }
 
 model Session {
@@ -58,6 +91,7 @@ model Session {
 
   @@index([userId])
   @@index([token])
+  @@map("sessions")
 }
 
 model BlacklistedToken {
@@ -67,6 +101,7 @@ model BlacklistedToken {
   createdAt DateTime @default(now())
 
   @@index([expiresAt])
+  @@map("blacklistedTokens")
 }
 
 model ProfileImage {
@@ -90,5 +125,5 @@ model PasswordHistory {
   user      User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
-  @@map("passwordHistory")
+  @@map("passwordHistorys")
 }
