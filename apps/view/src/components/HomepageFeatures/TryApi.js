@@ -11,7 +11,10 @@ export default function TryApi({ apiEndpoint, token }) {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
           },
+          credentials: "include",
+          mode: "cors",
         });
 
         if (!response.ok) {

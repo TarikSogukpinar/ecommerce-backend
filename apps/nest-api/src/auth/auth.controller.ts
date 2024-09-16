@@ -94,6 +94,8 @@ export class AuthController {
   async login(@Body() loginUserDto: LoginUserDto, @Req() req: Request) {
     const result = await this.authService.loginUserService(loginUserDto, req);
 
+    console.log('result', result);
+
     this.client.emit('token_created', {
       result,
     });

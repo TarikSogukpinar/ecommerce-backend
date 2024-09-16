@@ -5,7 +5,7 @@ import (
 	"go-api/config"
 	"go-api/controller"
 	"go-api/database"
-	middleware "go-api/middleware"
+	"go-api/middleware"
 	"log"
 	"os"
 	"time"
@@ -24,6 +24,10 @@ type TokenPayload struct {
 	Email        string `json:"email"`
 }
 
+type Message struct {
+	Result TokenPayload `json:"result"`
+}
+
 func main() {
 	// Load configuration and initialize environment variables
 	config.LoadConfig()
@@ -32,10 +36,16 @@ func main() {
 	// Create Fiber app instance
 	app := fiber.New()
 
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     "https://mock-store.tariksogukpinar.dev, https://mock-api.tariksogukpinar.dev",
+		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
+		AllowMethods:     "GET, POST, PUT, DELETE, OPTIONS",
+		AllowCredentials: true,
+	}))
+
 	// Connect to the database
 	database.ConnectDB()
 
-	// Middleware for rate-limiting requests
 	app.Use(limiter.New(limiter.Config{
 		Max:        100,
 		Expiration: 30 * time.Second,
@@ -43,14 +53,6 @@ func main() {
 
 	// Middleware for security headers
 	app.Use(helmet.New())
-
-	// Middleware for enabling CORS
-	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://localhost:3000, http://localhost:6060, http://localhost:7070",
-		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
-		AllowMethods:     "GET, POST, PUT, DELETE",
-		AllowCredentials: true,
-	}))
 
 	// Middleware for logging requests
 	app.Use(logger.New(logger.Config{
@@ -83,12 +85,11 @@ func main() {
 	// Start Fiber app
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "6060"
+		port = "3011"
 	}
-	log.Fatal(app.Listen(":" + port))
+	log.Fatal(app.Listen("0.0.0.0:3011"))
 }
 
-// Consume messages from RabbitMQ
 func consumeMessages(ch *amqp.Channel) {
 	msgs, err := ch.Consume(
 		"token_created_queue",
@@ -109,16 +110,18 @@ func consumeMessages(ch *amqp.Channel) {
 		for d := range msgs {
 			log.Printf("Incoming message: %s", d.Body)
 
-			var payload TokenPayload
-			err := json.Unmarshal(d.Body, &payload)
+			var message Message
+			err := json.Unmarshal(d.Body, &message)
 			if err != nil {
 				log.Printf("Message parsing error: %s", err)
 				continue
 			}
 
-			log.Printf("Message content: %v", payload)
+			payload := message.Result
 
-			log.Println("Access token...", payload.AccessToken)
+			log.Printf("Message content: %+v", payload)
+
+			log.Println("Access token:", payload.AccessToken)
 
 			claims, err := middleware.ValidateToken(payload.AccessToken)
 			if err != nil {
@@ -127,9 +130,54 @@ func consumeMessages(ch *amqp.Channel) {
 			}
 
 			log.Printf("Token is valid, user: %v", claims["id"])
-
 		}
 	}()
 
 	<-forever
 }
+
+// Consume messages from RabbitMQ
+// func consumeMessages(ch *amqp.Channel) {
+// 	msgs, err := ch.Consume(
+// 		"token_created_queue",
+// 		"",
+// 		true,  // Auto-acknowledge
+// 		false, // Exclusive
+// 		false, // No-local
+// 		false, // No-wait
+// 		nil,   // Arguments
+// 	)
+// 	if err != nil {
+// 		log.Fatalf("Queue messages could not be received: %v", err)
+// 	}
+
+// 	forever := make(chan bool)
+
+// 	go func() {
+// 		for d := range msgs {
+// 			log.Printf("Incoming message: %s", d.Body)
+
+// 			var payload TokenPayload
+// 			err := json.Unmarshal(d.Body, &payload)
+// 			if err != nil {
+// 				log.Printf("Message parsing error: %s", err)
+// 				continue
+// 			}
+
+// 			log.Printf("Message content: %v", payload)
+
+// 			log.Println("Access token...", payload.AccessToken)
+
+// 			claims, err := middleware.ValidateToken(payload.AccessToken)
+// 			if err != nil {
+// 				log.Println("Invalid token:", err)
+// 				continue
+// 			}
+
+// 			log.Printf("Token is valid, user: %v", claims["id"])
+
+// 		}
+// 	}()
+
+// 	<-forever
+// }

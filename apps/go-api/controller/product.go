@@ -29,6 +29,7 @@ func ProductsHandler(c *fiber.Ctx) error {
 	}
 
 	tokenString := strings.Replace(authHeader, "Bearer ", "", 1)
+	fmt.Println("Token: bilgisi", tokenString)
 
 	// Validate token using middleware function
 	claims, err := middleware.ValidateToken(tokenString)
