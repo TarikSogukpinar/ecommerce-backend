@@ -1,20 +1,16 @@
 package controller
 
 import (
+	"fmt"
+	"go-api/middleware"
+	"go-api/models"
 	services "go-api/services/product"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 )
-
-// Product represents a product in the system
-// type Product struct {
-// 	gorm.Model
-// 	ID    uint   `json:"id" gorm:"primaryKey"`
-// 	Name  string `json:"name"`
-// 	Price string `json:"price"`
-// }
 
 type ProductController struct {
 	ProductService services.ProductService
@@ -28,7 +24,28 @@ func NewProductController(productService services.ProductService) *ProductContro
 
 // GetAllProducts gets all products
 func (pc *ProductController) GetAllProducts(c *fiber.Ctx) error {
+
+	authHeader := c.Get("Authorization")
+	if authHeader == "" {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
+			"error": "Authorization header required",
+		})
+	}
+
+	tokenString := strings.Replace(authHeader, "Bearer ", "", 1)
+
+	// Validate token using middleware function
+	claims, err := middleware.ValidateToken(tokenString)
+	if err != nil {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
+			"error": "Invalid token: " + err.Error(),
+		})
+	}
+
+	fmt.Println("User ID:", claims["id"])
+
 	products, err := pc.ProductService.GetAllProducts()
+
 	if err != nil {
 		log.Println("Error fetching products:", err)
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
@@ -55,7 +72,7 @@ func (pc *ProductController) GetProductByID(c *fiber.Ctx) error {
 
 // CreateProduct creates a new product
 func (pc *ProductController) CreateProduct(c *fiber.Ctx) error {
-	var input services.ProductCreateInput
+	var input models.ProductCreateInput
 
 	if err := c.BodyParser(&input); err != nil {
 		log.Println("Invalid request body:", err)
@@ -78,7 +95,7 @@ func (pc *ProductController) CreateProduct(c *fiber.Ctx) error {
 // UpdateProduct updates an existing product by ID
 func (pc *ProductController) UpdateProduct(c *fiber.Ctx) error {
 	id := c.Params("id")
-	var input services.ProductUpdateInput
+	var input models.ProductUpdateInput
 
 	if err := c.BodyParser(&input); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
