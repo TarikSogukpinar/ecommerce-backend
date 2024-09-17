@@ -1,10 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"go-api/config"
+	"go-api/core/rabbitmq"
 	"go-api/database"
-	"go-api/middleware"
 	"go-api/routes"
 	"log"
 	"os"
@@ -18,7 +17,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/monitor"
-	"github.com/streadway/amqp"
 )
 
 type TokenPayload struct {
@@ -68,73 +66,20 @@ func main() {
 
 	app.Get("/metrics", monitor.New(monitor.Config{Title: "Mock API Monitoring"}))
 
-	// RabbitMQ connection
-	conn, err := amqp.Dial(os.Getenv("RABBITMQ_URL"))
+	conn, ch, err := rabbitmq.InitializeRabbitMQ()
 	if err != nil {
-		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
+		log.Fatalf("Failed to initialize RabbitMQ: %v", err)
 	}
-	defer conn.Close()
+	defer rabbitmq.CloseRabbitMQ()
 
-	// RabbitMQ channel creation
-	ch, err := conn.Channel()
-	if err != nil {
-		log.Fatalf("RabbitMQ channel error: %v", err)
-	}
-	defer ch.Close()
+	print("RabbitMQ connection established", conn)
 
-	// Start consuming messages from RabbitMQ
-	go consumeMessages(ch)
+	go rabbitmq.ConsumeMessages(ch)
 
-	// Start Fiber app
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "3011"
 	}
+
 	log.Fatal(app.Listen("0.0.0.0:3011"))
-}
-
-func consumeMessages(ch *amqp.Channel) {
-	msgs, err := ch.Consume(
-		"token_created_queue",
-		"",
-		true,  // Auto-acknowledge
-		false, // Exclusive
-		false, // No-local
-		false, // No-wait
-		nil,   // Arguments
-	)
-	if err != nil {
-		log.Fatalf("Queue messages could not be received: %v", err)
-	}
-
-	forever := make(chan bool)
-
-	go func() {
-		for d := range msgs {
-			log.Printf("Incoming message: %s", d.Body)
-
-			var message Message
-			err := json.Unmarshal(d.Body, &message)
-			if err != nil {
-				log.Printf("Message parsing error: %s", err)
-				continue
-			}
-
-			payload := message.Result
-
-			log.Printf("Message content: %+v", payload)
-
-			log.Println("Access token:", payload.AccessToken)
-
-			claims, err := middleware.ValidateToken(payload.AccessToken)
-			if err != nil {
-				log.Println("Invalid token:", err)
-				continue
-			}
-
-			log.Printf("Token is valid, user: %v", claims["id"])
-		}
-	}()
-
-	<-forever
 }

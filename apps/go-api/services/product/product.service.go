@@ -6,44 +6,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// // Product represents a product in the system
-// type Product struct {
-// 	gorm.Model
-// 	ID          uint    `json:"id" gorm:"primaryKey"`
-// 	Name        string  `json:"name"`
-// 	Description string  `json:"description"`
-// 	Price       float64 `json:"price"`
-// 	Quantity    int     `json:"quantity"`
-// 	Image       string  `json:"image"`
-// }
-
-// // ProductCreateInput holds the input for creating a product
-// type ProductCreateInput struct {
-// 	Name        string  `json:"name"`
-// 	Description string  `json:"description"`
-// 	Price       float64 `json:"price"`
-// 	Quantity    int     `json:"quantity"`
-// 	Image       string  `json:"image"`
-// }
-
-// // ProductUpdateInput holds the input for updating a product
-// type ProductUpdateInput struct {
-// 	Name        string  `json:"name"`
-// 	Description string  `json:"description"`
-// 	Price       float64 `json:"price"`
-// 	Quantity    int     `json:"quantity"`
-// 	Image       string  `json:"image"`
-// }
-
-// // ProductService defines methods for interacting with the product model
-// type ProductService interface {
-// 	GetAllProducts() ([]Product, error)
-// 	GetProductByID(id string) (Product, error)
-// 	CreateProduct(input ProductCreateInput) (Product, error)
-// 	UpdateProduct(id string, input ProductUpdateInput) (Product, error)
-// 	DeleteProduct(id string) error
-// }
-
 type ProductService interface {
 	GetAllProducts() ([]models.Product, error)
 	GetProductByID(id string) (models.Product, error)

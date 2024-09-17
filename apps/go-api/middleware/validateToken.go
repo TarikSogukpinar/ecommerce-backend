@@ -7,7 +7,6 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-// ValidateToken validates the JWT token and returns claims
 func ValidateToken(tokenString string) (jwt.MapClaims, error) {
 
 	var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
