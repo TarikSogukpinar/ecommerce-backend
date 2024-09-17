@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"go-api/config"
 	"go-api/core/rabbitmq"
 	"go-api/database"
@@ -91,7 +92,7 @@ func main() {
 	}
 	defer rabbitmq.CloseRabbitMQ()
 
-	print("RabbitMQ connection established", conn)
+	fmt.Println("RabbitMQ connection established", conn)
 
 	go rabbitmq.ConsumeMessages(ch)
 

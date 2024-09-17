@@ -1,6 +1,7 @@
 package database
 
 import (
+	"go-api/models"
 	"log"
 	"os"
 
@@ -23,6 +24,11 @@ func ConnectDB() {
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
+	}
+
+	err = DB.AutoMigrate(&models.Product{}, &models.Category{})
+	if err != nil {
+		log.Fatal("Failed to run migrations:", err)
 	}
 
 	log.Println("Database connection established")

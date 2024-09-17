@@ -114,7 +114,7 @@ export class AddressService {
       );
     }
   }
-  
+
   //check this method
   async deleteAddress(addressId: string, userId: string): Promise<any> {
     try {
