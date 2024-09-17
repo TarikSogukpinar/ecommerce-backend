@@ -3,18 +3,21 @@ package main
 import (
 	"encoding/json"
 	"go-api/config"
-	"go-api/controller"
 	"go-api/database"
 	"go-api/middleware"
+	"go-api/routes"
 	"log"
 	"os"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/healthcheck"
 	"github.com/gofiber/fiber/v2/middleware/helmet"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/monitor"
 	"github.com/streadway/amqp"
 )
 
@@ -31,7 +34,11 @@ type Message struct {
 func main() {
 	config.LoadConfig()
 
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		AppName: "Mock Store API v.1.0",
+	})
+
+	app.Use(compress.New())
 
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     "https://mock-store.tariksogukpinar.dev, https://mock-api.tariksogukpinar.dev",
@@ -49,14 +56,17 @@ func main() {
 
 	app.Use(helmet.New())
 
+	app.Use(healthcheck.New())
+
 	app.Use(logger.New(logger.Config{
 		Format:     "[${time}] ${status} - ${method} ${path}\n",
 		TimeFormat: "02-Jan-2006",
 		TimeZone:   "Local",
 	}))
 
-	app.Get("/api/products", controller.ProductsHandler)
-	app.Post("/api/products", controller.CreateProduct)
+	routes.SetupRoutes(app)
+
+	app.Get("/metrics", monitor.New(monitor.Config{Title: "Mock API Monitoring"}))
 
 	// RabbitMQ connection
 	conn, err := amqp.Dial(os.Getenv("RABBITMQ_URL"))

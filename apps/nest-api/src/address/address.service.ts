@@ -114,8 +114,9 @@ export class AddressService {
       );
     }
   }
-
-  async deleteAddress(addressId: string, userId: string) {
+  
+  //check this method
+  async deleteAddress(addressId: string, userId: string): Promise<any> {
     try {
       const deletedAddress = await this.prismaService.address.deleteMany({
         where: { id: addressId, userId },

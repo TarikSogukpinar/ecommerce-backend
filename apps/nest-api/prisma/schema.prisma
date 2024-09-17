@@ -33,7 +33,6 @@ model User {
   resetToken        String?
   resetTokenExpires DateTime?
   role              Role              @default(USER)
-  Session           Session[]
   PasswordHistory   PasswordHistory[]
   ProfileImage      ProfileImage[]
   Address           Address[]
@@ -75,23 +74,6 @@ model Preferences {
 
   @@index([userId])
   @@map("preferences")
-}
-
-model Session {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  ipAddress String?
-  userAgent String?
-  token     String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  expiresAt DateTime
-  isActive  Boolean  @default(true)
-
-  @@index([userId])
-  @@index([token])
-  @@map("sessions")
 }
 
 model BlacklistedToken {

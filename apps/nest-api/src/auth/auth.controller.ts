@@ -5,14 +5,10 @@ import {
   Req,
   UseGuards,
   UnauthorizedException,
-  Get,
-  Res,
   UsePipes,
   ValidationPipe,
   HttpCode,
   HttpStatus,
-  Param,
-  Delete,
   Inject,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -28,23 +24,9 @@ import { CustomRequest } from '../core/request/customRequest';
 import { RegisterUserDto } from './dto/requests/registerUser.dto';
 import { LogoutDto } from './dto/requests/logout.dto';
 import { ErrorCodes } from 'src/core/handler/error/error-codes';
-import { AuthGuard } from '@nestjs/passport';
-import { LogoutResponseDto } from './dto/responses/logoutResponse.dto';
 import { ConfigService } from '@nestjs/config';
-import { TokenService } from 'src/core/token/token.service';
-import { Request } from 'express';
-import { Role } from '@prisma/client';
 import { JwtAuthGuard } from './guard/auth.guard';
-import { Roles } from './guard/role.guard';
-import {
-  EventPattern,
-  Payload,
-  Ctx,
-  RmqContext,
-  ClientProxy,
-} from '@nestjs/microservices';
-import { JwtService } from '@nestjs/jwt';
-import { config } from 'process';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Controller({ path: 'auth', version: '1' })
 @ApiTags('Auth')
@@ -55,8 +37,6 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
-    private readonly tokenService: TokenService,
-    private readonly jwtService: JwtService,
     @Inject('USER_SERVICE') private readonly client: ClientProxy,
   ) {
     this.redirectUrl = this.configService.get<string>('REDIRECT_URL');
@@ -139,44 +119,5 @@ export class AuthController {
   async refreshToken(@Body('refreshToken') refreshToken: string) {
     const result = await this.authService.refreshTokenService(refreshToken);
     return { message: 'Token refreshed', result };
-  }
-
-  @Get(':userId')
-  @UseGuards(JwtAuthGuard)
-  @ApiBody({ type: Number })
-  @ApiOperation({ summary: 'Get all active sessions for a user' })
-  @ApiResponse({
-    status: 200,
-    description: 'List of active sessions',
-  })
-  @HttpCode(HttpStatus.OK)
-  @Roles(Role.ADMIN, Role.USER)
-  async getUserSessions(@Param('userId') userId: string) {
-    return await this.authService.getUserSessions(userId);
-  }
-
-  @Delete(':userId/:token')
-  @UseGuards(JwtAuthGuard)
-  @ApiBody({ type: Number })
-  @ApiOperation({ summary: 'Terminate a session for a user' })
-  @ApiResponse({
-    status: 200,
-    description: 'Session terminated successfully',
-  })
-  @HttpCode(HttpStatus.OK)
-  @Roles(Role.ADMIN, Role.USER)
-  async terminateUserSession(
-    @Param('userId') userId: string,
-    @Param('token') token: string,
-  ) {
-    const terminatedSession = await this.authService.terminateSession(
-      userId,
-      token,
-    );
-
-    return {
-      message: 'Session terminated successfully',
-      sessionId: terminatedSession.id,
-    };
   }
 }
