@@ -6,6 +6,8 @@ import { AuthModule } from './auth/auth.module';
 import { SwaggerModule } from './core/swagger/swagger.module';
 import { UserModule } from './user/user.module';
 import { AddressModule } from './address/address.module';
+import { SupportModule } from './support/support.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -34,6 +36,8 @@ import { AddressModule } from './address/address.module';
     PrismaModule,
     SwaggerModule,
     AddressModule,
+    SupportModule,
+    AdminModule,
   ],
   controllers: [],
   providers: [],

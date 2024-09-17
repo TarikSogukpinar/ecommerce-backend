@@ -8,7 +8,6 @@ import {
 import { PrismaService } from '../database/database.service';
 import { TokenService } from '../core/token/token.service';
 import { RegisterResponseDto } from './dto/responses/registerResponse.dto';
-import { User } from '@prisma/client';
 import { LoginUserDto } from './dto/requests/loginUser.dto';
 import { ErrorCodes } from 'src/core/handler/error/error-codes';
 import { RegisterUserDto } from './dto/requests/registerUser.dto';
@@ -16,8 +15,6 @@ import { LoginResponseDto } from './dto/responses/loginResponse.dto';
 import { HashingService } from 'src/utils/hashing/hashing.service';
 import { JwtService } from '@nestjs/jwt';
 import { LogoutResponseDto } from './dto/responses/logoutResponse.dto';
-import * as requestIp from 'request-ip';
-import { Request } from 'express';
 import { ClientProxy, EventPattern } from '@nestjs/microservices';
 
 @Injectable()

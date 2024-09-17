@@ -20,6 +20,12 @@ enum Role {
   GUEST
 }
 
+enum TicketStatus {
+  PENDING
+  OPEN
+  CLOSED
+}
+
 model User {
   id                String            @id @default(cuid())
   uuid              String            @unique @default(uuid())
@@ -37,6 +43,9 @@ model User {
   ProfileImage      ProfileImage[]
   Address           Address[]
   Preferences       Preferences[]
+  SupportTicket     SupportTicket[]
+  ActiviyLog        ActivityLog[]
+  deletedAt         DateTime?
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
 
@@ -49,7 +58,7 @@ model Address {
   id          String   @id @default(cuid())
   uuid        String   @unique @default(uuid())
   userId      String
-  user        User     @relation(fields: [userId], references: [id])
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   addressLine String
   city        String
   state       String
@@ -59,21 +68,39 @@ model Address {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  @@index([userId])
+  @@index([userId, isDefault])
   @@map("addresses")
 }
 
 model Preferences {
   id                     String   @id @default(cuid())
   userId                 String
-  user                   User     @relation(fields: [userId], references: [id])
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   emailNotifications     Boolean  @default(true)
   productRecommendations Boolean  @default(true)
+  language               String   @default("en")
+  currency               String   @default("USD")
+  timeZone               String   @default("UTC")
+  darkMode               Boolean  @default(false)
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 
   @@index([userId])
   @@map("preferences")
+}
+
+model SupportTicket {
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject     String
+  description String
+  status      TicketStatus @default(PENDING)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([userId, status])
+  @@map("support_tickets")
 }
 
 model BlacklistedToken {
@@ -90,7 +117,7 @@ model ProfileImage {
   id        String   @id @default(cuid())
   userId    String
   uuid      String   @unique @default(uuid())
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   imageUrl  String
   createdAt DateTime @default(now())
 
@@ -104,8 +131,20 @@ model PasswordHistory {
   userId    String
   password  String
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("passwordHistorys")
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  adminId   String
+  admin     User     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  action    String
+  targetId  String?
+  createdAt DateTime @default(now())
+
+  @@index([adminId])
+  @@map("activity_logs")
 }
