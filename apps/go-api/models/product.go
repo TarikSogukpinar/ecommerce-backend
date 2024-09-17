@@ -4,7 +4,7 @@ import "gorm.io/gorm"
 
 // Product represents a product in the system
 type Product struct {
-	gorm.Model
+	gorm.Model  `json:"-" swaggerignore:"true"`
 	ID          uint    `json:"id" gorm:"primaryKey"`
 	Name        string  `json:"name"`
 	Description string  `json:"description"`

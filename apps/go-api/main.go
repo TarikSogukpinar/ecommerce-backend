@@ -9,6 +9,8 @@ import (
 	"os"
 	"time"
 
+	_ "go-api/docs"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -17,6 +19,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/monitor"
+	"github.com/gofiber/swagger"
 )
 
 type TokenPayload struct {
@@ -29,6 +32,20 @@ type Message struct {
 	Result TokenPayload `json:"result"`
 }
 
+// @title Mock-API Swagger Example API
+// @version 1.0
+// @description This is a sample server for a Fiber application.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:3011
+// @BasePath /
 func main() {
 	config.LoadConfig()
 
@@ -65,6 +82,8 @@ func main() {
 	routes.SetupRoutes(app)
 
 	app.Get("/metrics", monitor.New(monitor.Config{Title: "Mock API Monitoring"}))
+
+	app.Get("/swagger/*", swagger.HandlerDefault)
 
 	conn, ch, err := rabbitmq.InitializeRabbitMQ()
 	if err != nil {
