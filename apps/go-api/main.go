@@ -78,8 +78,8 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "3011"
+		port = "0.0.0.0:3011"
 	}
 
-	log.Fatal(app.Listen("0.0.0.0:3011"))
+	log.Fatal(app.Listen(port))
 }
