@@ -1,4 +1,4 @@
-import { IsString, IsTaxId } from 'class-validator';
+import { IsString } from 'class-validator';
 
 export class GetAddressByIdDto {
   @IsString()

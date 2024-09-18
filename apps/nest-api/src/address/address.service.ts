@@ -7,6 +7,9 @@ import { GetAddressByIdDto } from './dto/requests/getAddressById.dto';
 import { GetAddressByIdResponseDto } from './dto/responses/getAddressByIdResponse.dto';
 import { UpdateAddressDto } from './dto/requests/updateAddress.dto';
 import { CreateAddressResponseDto } from './dto/responses/createAddressResponse.dto';
+import { UpdateAddressResponseDto } from './dto/responses/updateAddressResponse.dto';
+import { DeleteAddressDto } from './dto/requests/deleteAddress.dto';
+import { DeleteAddressResponseDto } from './dto/responses/deleteAddressResponse.dto';
 
 @Injectable()
 export class AddressService {
@@ -50,15 +53,24 @@ export class AddressService {
 
   async getAllAddressesForUser(
     getAllAddressesForUserDto: GetAllAddressesForUserDto,
-  ): Promise<CreateAddressResponseDto[]> {
+  ): Promise<GetAllAddressesForUserDto[]> {
     try {
-      const addresses = await this.prismaService.address.findMany({
+      const getAllAddressesForUser = await this.prismaService.address.findMany({
         where: { userId: getAllAddressesForUserDto.userId },
+        select: {
+          userId: true,
+          addressLine: true,
+          city: true,
+          state: true,
+          country: true,
+          postalCode: true,
+        },
       });
 
-      if (addresses.length === 0) throw new NoAddressesFoundForUserException();
+      if (getAllAddressesForUser.length === 0)
+        throw new NoAddressesFoundForUserException();
 
-      return addresses;
+      return getAllAddressesForUser;
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException(
@@ -71,16 +83,24 @@ export class AddressService {
     getAddressByIdDto: GetAddressByIdDto,
   ): Promise<GetAddressByIdResponseDto> {
     try {
-      const address = await this.prismaService.address.findFirst({
+      const getAddressById = await this.prismaService.address.findFirst({
         where: {
           id: getAddressByIdDto.addressId,
           userId: getAddressByIdDto.userId,
         },
+        select: {
+          userId: true,
+          addressLine: true,
+          city: true,
+          state: true,
+          country: true,
+          postalCode: true,
+        },
       });
 
-      if (!address) throw new NoAddressesFoundForUserException();
+      if (!getAddressById) throw new NoAddressesFoundForUserException();
 
-      return address;
+      return getAddressById;
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException(
@@ -89,24 +109,28 @@ export class AddressService {
     }
   }
 
-  //check this method
   async updateAddress(
     getAddressByIdDto: GetAddressByIdDto,
     updateAddressDto: UpdateAddressDto,
-  ): Promise<any> {
+  ): Promise<UpdateAddressResponseDto> {
     try {
-      const updatedAddress = await this.prismaService.address.updateMany({
+      const updatedAddress = await this.prismaService.address.update({
         where: {
-          id: getAddressByIdDto.userId,
-          userId: getAddressByIdDto.addressId,
+          id: getAddressByIdDto.addressId,
+          userId: getAddressByIdDto.userId,
         },
         data: updateAddressDto,
       });
 
-      if (updatedAddress.count === 0)
-        throw new NoAddressesFoundForUserException();
+      const response: UpdateAddressResponseDto = {
+        addressLine: updatedAddress.addressLine,
+        city: updatedAddress.city,
+        state: updatedAddress.state,
+        postalCode: updatedAddress.postalCode,
+        country: updatedAddress.country,
+      };
 
-      return updatedAddress;
+      return response;
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException(
@@ -115,16 +139,19 @@ export class AddressService {
     }
   }
 
-  //check this method
-  async deleteAddress(addressId: string, userId: string): Promise<any> {
+  async deleteAddress(
+    deleteAddressDto: DeleteAddressDto,
+  ): Promise<DeleteAddressResponseDto> {
     try {
       const deletedAddress = await this.prismaService.address.deleteMany({
-        where: { id: addressId, userId },
+        where: {
+          id: deleteAddressDto.addressId,
+          userId: deleteAddressDto.userId,
+        },
       });
 
-      if (!deletedAddress.count) {
-        throw new Error('Address not found or access denied');
-      }
+      if (deletedAddress.count === 0)
+        throw new NoAddressesFoundForUserException();
 
       return { message: 'Address deleted successfully' };
     } catch (error) {
