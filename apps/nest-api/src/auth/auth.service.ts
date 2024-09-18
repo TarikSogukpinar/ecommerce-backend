@@ -16,6 +16,7 @@ import { HashingService } from 'src/utils/hashing/hashing.service';
 import { JwtService } from '@nestjs/jwt';
 import { LogoutResponseDto } from './dto/responses/logoutResponse.dto';
 import { ClientProxy, EventPattern } from '@nestjs/microservices';
+import { UserNotFoundException } from 'src/core/handler/expcetions/custom-expection';
 
 @Injectable()
 export class AuthService {
@@ -111,9 +112,7 @@ export class AuthService {
         where: { id: userId },
       });
 
-      if (!user) {
-        throw new NotFoundException(ErrorCodes.UserNotFound);
-      }
+      if (!user) throw new UserNotFoundException();
 
       await this.prismaService.user.update({
         where: { id: userId },

@@ -27,6 +27,7 @@ import { ErrorCodes } from 'src/core/handler/error/error-codes';
 import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from './guard/auth.guard';
 import { ClientProxy } from '@nestjs/microservices';
+import { InvalidCredentialsException } from 'src/core/handler/expcetions/custom-expection';
 
 @Controller({ path: 'auth', version: '1' })
 @ApiTags('Auth')
@@ -98,15 +99,12 @@ export class AuthController {
     const authHeader = req.headers['authorization'];
     const token = authHeader ? authHeader.split(' ')[1] : null;
 
-    if (!userId) {
-      throw new UnauthorizedException(ErrorCodes.InvalidCredentials);
-    }
+    if (!userId) throw new InvalidCredentialsException();
 
-    if (!token) {
-      throw new UnauthorizedException(ErrorCodes.InvalidCredentials);
-    }
+    if (!token) throw new InvalidCredentialsException();
 
     const result = await this.authService.logoutUserService(userId, token);
+
     return { message: 'Logout successful', result };
   }
 

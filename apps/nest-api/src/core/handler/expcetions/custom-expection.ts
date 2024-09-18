@@ -119,3 +119,9 @@ export class NoAddressesFoundForUserException extends HttpException {
     super('No addresses found for this user', HttpStatus.NOT_FOUND);
   }
 }
+
+export class TicketNotFoundException extends HttpException {
+  constructor() {
+    super('Ticket not found', HttpStatus.NOT_FOUND);
+  }
+}
