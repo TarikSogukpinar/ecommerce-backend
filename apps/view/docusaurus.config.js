@@ -1,10 +1,7 @@
-// @ts-check
-// `@type` JSDoc annotations allow editor autocompletion and type checking
-// (when paired with `@ts-check`).
-// There are various equivalent ways to declare your Docusaurus config.
-// See: https://docusaurus.io/docs/api/docusaurus-config
+// docusaurus.config.js
 
 import { themes as prismThemes } from "prism-react-renderer";
+
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: "Mock Store Open Source API",
@@ -20,21 +17,14 @@ const config = {
       "classic",
       {
         docs: {
-          sidebarPath: "./sidebars.js",
+          sidebarPath: require.resolve("./sidebars.js"),
           // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
+          editUrl: "https://github.com/your-repo-link/edit/main/",
           docItemComponent: "@theme/ApiItem", // Derived from docusaurus-theme-openapi
         },
         blog: {
           showReadingTime: true,
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
-          onInlineAuthors: "ignore",
-          onUntruncatedBlogPosts: "ignore",
+          editUrl: "https://github.com/your-repo-link/edit/main/blog/",
         },
         theme: {
           customCss: require.resolve("./src/css/custom.css"),
@@ -109,80 +99,21 @@ const config = {
       copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
     },
     prism: {
-      prism: {
-        additionalLanguages: [
-          "ruby",
-          "csharp",
-          "php",
-          "java",
-          "powershell",
-          "json",
-          "bash",
-        ],
-      },
-      languageTabs: [
-        {
-          highlight: "python",
-          language: "python",
-          logoClass: "python",
-        },
-        {
-          highlight: "bash",
-          language: "curl",
-          logoClass: "bash",
-        },
-        {
-          highlight: "csharp",
-          language: "csharp",
-          logoClass: "csharp",
-        },
-        {
-          highlight: "go",
-          language: "go",
-          logoClass: "go",
-        },
-        {
-          highlight: "javascript",
-          language: "nodejs",
-          logoClass: "nodejs",
-        },
-        {
-          highlight: "ruby",
-          language: "ruby",
-          logoClass: "ruby",
-        },
-        {
-          highlight: "php",
-          language: "php",
-          logoClass: "php",
-        },
-        {
-          highlight: "java",
-          language: "java",
-          logoClass: "java",
-          variant: "unirest",
-        },
-        {
-          highlight: "powershell",
-          language: "powershell",
-          logoClass: "powershell",
-        },
-      ],
+      additionalLanguages: ["javascript", "python"], // Göstermek istediğiniz dillerin listesi
     },
   },
 
+  // OpenAPI eklentisini ekleyin
   plugins: [
     [
       "docusaurus-plugin-openapi-docs",
       {
-        id: "openapi",
+        id: "api",
         docsPluginId: "classic",
         config: {
-          petstore: {
-            specPath: "examples/petstore.yaml",
-            outputDir: "docs/petstore",
-            downloadUrl:
-              "https://raw.githubusercontent.com/PaloAltoNetworks/docusaurus-template-openapi-docs/main/examples/petstore.yaml",
+          exampleApi: {
+            specPath: "docs/example.yml", // OpenAPI YAML dosyanızın yolu
+            outputDir: "docs/api", // Dokümanların nereye kaydedileceği
             sidebarOptions: {
               groupPathsBy: "tag",
               categoryLinkSource: "tag",
@@ -193,9 +124,8 @@ const config = {
     ],
   ],
 
+  // Tema ayarlarını ekleyin
   themes: ["docusaurus-theme-openapi-docs"],
 };
 
-export default async function createConfig() {
-  return config;
-}
+export default config;

@@ -1,8 +1,7 @@
 ---
-id: intro
-title: "Quick Start"
 sidebar_position: 1
 ---
+
 
 # Quick Start
 
@@ -14,11 +13,3 @@ This Mock Store API is a fully-featured, open-source project built using **Go, N
 
 The Mock Store API offers RESTful endpoints for various e-commerce operations, including user management, product catalog, and order processing.
 
----
-
-## Get Started
-
-Click the "Try" button below to make a request to the `/user/me` endpoint and display the response:
-
-```jsx
-import TryApiExample from '@site/src/components/HomepageFeatures/TryApiExample';

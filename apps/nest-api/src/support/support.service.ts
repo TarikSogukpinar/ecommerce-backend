@@ -58,23 +58,23 @@ export class SupportService {
   async getTicketDetails(
     getTicketDetailsParamsDto: GetTicketDetailsParamsDto,
   ): Promise<TicketDetailsResponseDto> {
-    const ticket = await this.prismaService.supportTicket.findFirst({
+    const getTicketDetails = await this.prismaService.supportTicket.findFirst({
       where: {
         id: getTicketDetailsParamsDto.ticketId,
         userId: getTicketDetailsParamsDto.userId,
       },
     });
 
-    if (!ticket) throw new TicketNotFoundException();
+    if (!getTicketDetails) throw new TicketNotFoundException();
 
     return {
-      id: ticket.id,
-      userId: ticket.userId,
-      subject: ticket.subject,
-      description: ticket.description,
-      status: ticket.status,
-      createdAt: ticket.createdAt,
-      updatedAt: ticket.updatedAt,
+      id: getTicketDetails.id,
+      userId: getTicketDetails.userId,
+      subject: getTicketDetails.subject,
+      description: getTicketDetails.description,
+      status: getTicketDetails.status,
+      createdAt: getTicketDetails.createdAt,
+      updatedAt: getTicketDetails.updatedAt,
     };
   }
 }

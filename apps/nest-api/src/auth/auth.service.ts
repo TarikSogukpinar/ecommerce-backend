@@ -16,7 +16,10 @@ import { HashingService } from 'src/utils/hashing/hashing.service';
 import { JwtService } from '@nestjs/jwt';
 import { LogoutResponseDto } from './dto/responses/logoutResponse.dto';
 import { ClientProxy, EventPattern } from '@nestjs/microservices';
-import { UserNotFoundException } from 'src/core/handler/expcetions/custom-expection';
+import {
+  UserAlreadyExistsException,
+  UserNotFoundException,
+} from 'src/core/handler/expcetions/custom-expection';
 
 @Injectable()
 export class AuthService {
@@ -38,9 +41,7 @@ export class AuthService {
         where: { email },
       });
 
-      if (existingUser) {
-        throw new ConflictException(ErrorCodes.UserAlreadyExists);
-      }
+      if (existingUser) throw new UserAlreadyExistsException();
 
       const hashedPassword = await this.hashingService.hashPassword(password);
 

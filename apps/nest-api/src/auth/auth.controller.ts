@@ -4,7 +4,6 @@ import {
   Body,
   Req,
   UseGuards,
-  UnauthorizedException,
   UsePipes,
   ValidationPipe,
   HttpCode,
@@ -23,7 +22,6 @@ import {
 import { CustomRequest } from '../core/request/customRequest';
 import { RegisterUserDto } from './dto/requests/registerUser.dto';
 import { LogoutDto } from './dto/requests/logout.dto';
-import { ErrorCodes } from 'src/core/handler/error/error-codes';
 import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from './guard/auth.guard';
 import { ClientProxy } from '@nestjs/microservices';
