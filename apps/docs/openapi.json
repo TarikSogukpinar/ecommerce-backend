@@ -6,6 +6,12 @@
     "version": "1.0",
     "contact": {}
   },
+  "servers": [
+    {
+      "url": "http://localhost:3010",
+      "description": "Local development server"
+    }
+  ],
   "tags": [
     {
       "name": "Auth (NestJS)",
@@ -85,7 +91,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RegisterUserDto"
+                "$ref": "#/components/schemas/LoginUserDto"
               }
             }
           }
@@ -96,20 +102,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RegisterUserDto"
+                  "$ref": "#/components/schemas/LoginUserDto"
                 }
               }
             }
           }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
+        }
       }
     },
-    
     "/api/v1/go/products": {
       "get": {
         "operationId": "GoController_getAllProducts",
@@ -159,6 +159,28 @@
           },
           "password": {
             "type": "string"
+          }
+        }
+      },
+      "LoginUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "johndoe@gmail.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "securepassword123"
+          }
+        }
+      },
+      "LoginResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
           }
         }
       },
