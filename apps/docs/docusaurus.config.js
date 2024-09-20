@@ -1,20 +1,14 @@
-// @ts-check
-// `@type` JSDoc annotations allow editor autocompletion and type checking
-// (when paired with `@ts-check`).
-// There are various equivalent ways to declare your Docusaurus config.
-// See: https://docusaurus.io/docs/api/docusaurus-config
-
 import { themes as prismThemes } from "prism-react-renderer";
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: "Mock Store Open Source API",
-  tagline: "Mock Store Open Source API",
+  tagline: "",
   url: "https://mock-store.tariksogukpinar.dev",
   baseUrl: "/",
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
-  favicon: "img/favicon.ico",
+  favicon: "img/logo2.svg",
   organizationName: "mock-store-api", // Usually your GitHub org/user name.
   projectName: "mock-store-api", // Usually your repo name.
   presets: [

@@ -12,13 +12,17 @@ function HomepageHeader() {
     <header className={clsx("hero hero--primary", styles.heroBanner)}>
       <div className="container">
         <h1 className="hero__title">{siteConfig.title}</h1>
+        <div className={styles.fixedNotice}>
+          🚧 This API Service is still under development. The Service maybe subject to changes. 🚧
+        </div>
+
         <p className="hero__subtitle">{siteConfig.tagline}</p>
         <div className={styles.buttons}>
           <Link
             className="button button--secondary button--lg"
             to="/docs/intro"
           >
-             Try API - Quick Start Guide
+            Try API - Quick Start Guide
           </Link>
         </div>
       </div>
@@ -28,15 +32,19 @@ function HomepageHeader() {
 
 export default function Home() {
   const { siteConfig } = useDocusaurusContext();
+
   return (
-    <Layout
-      title={`${siteConfig.title}`}
-      description="Description will go into a meta tag in <head />"
-    >
-      <HomepageHeader />
-      <main>
-        <HomepageFeatures />
-      </main>
-    </Layout>
+    <div>
+      <div style={styles.container}></div>
+      <Layout
+        title={`${siteConfig.title}`}
+        description="Description will go into a meta tag in <head />"
+      >
+        <HomepageHeader />
+        <main>
+          <HomepageFeatures />
+        </main>
+      </Layout>
+    </div>
   );
 }

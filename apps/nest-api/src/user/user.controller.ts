@@ -57,7 +57,7 @@ export class UserController {
   }
 
   @Get('me')
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get current user profile' })
   @ApiResponse({ status: 200, description: 'User retrieved successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -75,7 +75,7 @@ export class UserController {
 
     return { message: 'User Information retrieved successfully', result };
   }
-  
+
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get user by ID' })

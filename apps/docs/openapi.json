@@ -8,7 +8,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:3010",
+      "url": "https://mock-api.tariksogukpinar.dev",
       "description": "Local development server"
     }
   ],
@@ -43,7 +43,7 @@
     }
   ],
   "paths": {
-    "/api/v1/auth/register": {
+    "/nest/api/v1/auth/register": {
       "post": {
         "operationId": "AuthController_register",
         "summary": "User register",
@@ -79,7 +79,7 @@
         ]
       }
     },
-    "/api/v1/auth/login": {
+    "/nest/api/v1/auth/login": {
       "post": {
         "operationId": "AuthController_login",
         "summary": "User login",
@@ -110,7 +110,178 @@
         }
       }
     },
-    "/api/v1/go/products": {
+    "/nest/api/v1/user/users": {
+      "get": {
+        "operationId": "UserController_GetAllUsers",
+        "summary": "Get All Users",
+        "tags": [
+          "Auth (NestJS)"
+        ],
+        "responses": {
+          "200": {
+            "description": "Users retrieved successfully",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized - Invalid or missing token"
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/nest/api/v1/user/me": {
+      "get": {
+        "operationId": "UserController_Me",
+        "summary": "Me",
+        "tags": [
+          "Auth (NestJS)"
+        ],
+        "responses": {
+          "200": {
+            "description": "User retrieved successfully",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized - Invalid or missing token"
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/nest/api/v1/user/{id}": {
+      "get": {
+        "operationId": "UserController_GetUserById",
+        "summary": "Get User By Id",
+        "tags": [
+          "Auth (NestJS)"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "User ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User retrieved successfully",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized - Invalid or missing token"
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "put": {
+        "operationId": "UserController_updateUser",
+        "summary": "Update user by ID",
+        "tags": [
+          "Auth (NestJS)"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "User ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid data"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "401": {
+          "description": "Unauthorized - Invalid or missing token"
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/nest/api/v1/user/{id}/password": {
+      "put": {
+        "operationId": "UserController_changePassword",
+        "summary": "Change user password",
+        "tags": [
+          "Auth (NestJS)"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeUserPassworDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User retrieved successfully",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized - Invalid or missing token"
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/nest/api/v1/go/products": {
       "get": {
         "operationId": "GoController_getAllProducts",
         "summary": "Get all products (Go)",
@@ -124,7 +295,7 @@
         }
       }
     },
-    "/api/v1/go/orders": {
+    "/go/api/v1/go/orders": {
       "post": {
         "operationId": "GoController_createOrder",
         "summary": "Create order (Go)",
@@ -151,14 +322,27 @@
   },
   "components": {
     "schemas": {
+      "securitySchemes": {
+        "bearerAuth": {
+          "type": "http",
+          "scheme": "bearer",
+          "bearerFormat": "JWT"
+        }
+      },
       "RegisterUserDto": {
         "type": "object",
         "properties": {
+          "name": {
+            "type": "string",
+            "example": "John Doe"
+          },
           "email": {
-            "type": "string"
+            "type": "string",
+            "example": "johndoe@gmail.com"
           },
           "password": {
-            "type": "string"
+            "type": "string",
+            "example": "securepassword123"
           }
         }
       },
@@ -181,6 +365,15 @@
           "accessToken": {
             "type": "string",
             "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          }
+        }
+      },
+      "ChangeUserPassworDto": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "example": "securepassword123"
           }
         }
       },

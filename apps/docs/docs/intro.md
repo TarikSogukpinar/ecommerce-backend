@@ -2,7 +2,6 @@
 sidebar_position: 1
 ---
 
-
 # Quick Start
 
 ## Fake Store API
@@ -13,3 +12,17 @@ This Mock Store API is a fully-featured, open-source project built using **Go, N
 
 The Mock Store API offers RESTful endpoints for various e-commerce operations, including user management, product catalog, and order processing.
 
+<!-- JSX Style for Button -->
+<div
+  style={{
+    marginTop: '20px',
+    padding: '10px 20px',
+    backgroundColor: '#000b16',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '5px',
+    display: 'inline-block'
+  }}
+>
+  <a href="/api" style={{ color: 'white', textDecoration: 'none' }}>Start Here!</a>
+</div>
