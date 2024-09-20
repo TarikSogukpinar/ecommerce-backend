@@ -1,5 +1,5 @@
 # Base image olarak Node.js 16 kullanın
-FROM node:18
+FROM node:20-alpine
 
 # Uygulama için çalışma dizini oluşturun
 WORKDIR /usr/src/app
