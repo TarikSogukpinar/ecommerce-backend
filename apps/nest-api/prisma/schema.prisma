@@ -11,6 +11,7 @@ generator client {
 datasource db {
   provider = "cockroachdb"
   url      = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_DIRECT")
 }
 
 enum Role {

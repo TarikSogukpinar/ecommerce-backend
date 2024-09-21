@@ -82,6 +82,14 @@ export class AuthService {
           },
         });
       }
+      await this.prismaService.user.findMany({
+        where: {
+          email: {
+            contains: 'alice@prisma.io',
+          },
+        },
+      });
+
       const accessToken = await this.tokenService.createAccessToken(user);
       const refreshToken = await this.tokenService.createRefreshToken(user);
 
@@ -94,6 +102,7 @@ export class AuthService {
         accessToken,
         refreshToken,
         email: user.email,
+        cacheStrategy: { ttl: 10 },
       };
     } catch (error) {
       console.log(error);

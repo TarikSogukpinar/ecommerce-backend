@@ -29,7 +29,7 @@ export class UserService {
       const offset = (page - 1) * limit;
 
       const [users, totalUsers] = await Promise.all([
-        this.prismaService.user.findMany({
+        await this.prismaService.user.findMany({
           skip: offset,
           take: limit,
           select: {
@@ -39,7 +39,7 @@ export class UserService {
             name: true,
           },
         }),
-        this.prismaService.user.count(),
+        await this.prismaService.user.count(),
       ]);
 
       if (users.length === 0) throw new UserNotFoundException();

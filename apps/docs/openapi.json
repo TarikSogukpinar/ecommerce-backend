@@ -30,6 +30,10 @@
       "description": "Support-related endpoints in NestJS"
     },
     {
+      "name": "Address (NestJS)",
+      "description": "Address endpoints in NestJS"
+    },
+    {
       "name": "Admin (NestJS)",
       "description": "Admin-related operations in NestJS"
     },
@@ -115,7 +119,7 @@
         "operationId": "UserController_GetAllUsers",
         "summary": "Get All Users",
         "tags": [
-          "Auth (NestJS)"
+          "Users (NestJS)"
         ],
         "responses": {
           "200": {
@@ -140,7 +144,7 @@
         "operationId": "UserController_Me",
         "summary": "Me",
         "tags": [
-          "Auth (NestJS)"
+          "Users (NestJS)"
         ],
         "responses": {
           "200": {
@@ -165,7 +169,7 @@
         "operationId": "UserController_GetUserById",
         "summary": "Get User By Id",
         "tags": [
-          "Auth (NestJS)"
+          "Users (NestJS)"
         ],
         "parameters": [
           {
@@ -199,7 +203,7 @@
         "operationId": "UserController_updateUser",
         "summary": "Update user by ID",
         "tags": [
-          "Auth (NestJS)"
+          "Users (NestJS)"
         ],
         "parameters": [
           {
@@ -251,7 +255,7 @@
         "operationId": "UserController_changePassword",
         "summary": "Change user password",
         "tags": [
-          "Auth (NestJS)"
+          "Users (NestJS)"
         ],
         "requestBody": {
           "required": true,
@@ -281,42 +285,418 @@
         ]
       }
     },
-    "/nest/api/v1/go/products": {
-      "get": {
-        "operationId": "GoController_getAllProducts",
-        "summary": "Get all products (Go)",
+    "/nest/api/v1/address/createAddress": {
+      "put": {
+        "operationId": "AddressController_createAddress",
+        "summary": "Create address",
         "tags": [
-          "Products (Go)"
-        ],
-        "responses": {
-          "200": {
-            "description": "Products retrieved successfully"
-          }
-        }
-      }
-    },
-    "/go/api/v1/go/orders": {
-      "post": {
-        "operationId": "GoController_createOrder",
-        "summary": "Create order (Go)",
-        "tags": [
-          "Orders (Go)"
+          "Address (NestJS)"
         ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateOrderDto"
+                "$ref": "#/components/schemas/CreateAddressDto"
               }
             }
           }
         },
         "responses": {
-          "201": {
-            "description": "Order created successfully"
+          "200": {
+            "description": "Address created successfully",
+            "content": {
+              "application/json": {}
+            }
           }
-        }
+        },
+        "401": {
+          "description": "Unauthorized - Invalid or missing token"
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/nest/api/v1/address/userAddress/{userId}": {
+      "put": {
+        "operationId": "AddressController_getAllAddressesForUsers",
+        "summary": "Get All Addresses For User",
+        "tags": [
+          "Address (NestJS)"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAddressDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Address retrieved successfully",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized - Invalid or missing token"
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/nest/api/v1/address/{addressId}/user/{userId}": {
+      "put": {
+        "operationId": "AddressController_updateAddress",
+        "summary": "Update Address",
+        "tags": [
+          "Address (NestJS)"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAddressDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Address retrieved successfully",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized - Invalid or missing token"
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "AddressController_deleteAddress",
+        "summary": "Delete Address",
+        "tags": [
+          "Address (NestJS)"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAddressDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Address deleted successfully",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized - Invalid or missing token"
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/nest/api/v1/support/createSupportTicket": {
+      "put": {
+        "operationId": "AddressController_updateAddress",
+        "summary": "Create Support Ticket",
+        "tags": [
+          "Support (NestJS)"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAddressDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Address retrieved successfully",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized - Invalid or missing token"
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "AddressController_deleteAddress",
+        "summary": "Delete Support",
+        "tags": [
+          "Support (NestJS)"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAddressDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Address deleted successfully",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized - Invalid or missing token"
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/nest/api/v1/support/getMyTickets": {
+      "put": {
+        "operationId": "AddressController_getMyTickets",
+        "summary": "Get My Tickets",
+        "tags": [
+          "Support (NestJS)"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAddressDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Address retrieved successfully",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized - Invalid or missing token"
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "AddressController_deleteAddress",
+        "summary": "Delete Support",
+        "tags": [
+          "Support (NestJS)"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAddressDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Address deleted successfully",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized - Invalid or missing token"
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/nest/api/v1/support/getTicketDetails/{ticketId}/user/{userId}": {
+      "put": {
+        "operationId": "AddressController_getMyTickets",
+        "summary": "Get My Tickets",
+        "tags": [
+          "Support (NestJS)"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAddressDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Address retrieved successfully",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized - Invalid or missing token"
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/nest/api/v1/admin/getAllTickets": {
+      "put": {
+        "operationId": "AddressController_getAllTickets",
+        "summary": "Get All Tickets",
+        "tags": [
+          "Admin (NestJS)"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAddressDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Address retrieved successfully",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized - Invalid or missing token"
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/nest/api/v1/admin/updateTicket/{ticketId}": {
+      "put": {
+        "operationId": "AddressController_updateTicket",
+        "summary": "Update Ticket",
+        "tags": [
+          "Admin (NestJS)"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAddressDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Address retrieved successfully",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized - Invalid or missing token"
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/nest/api/v1/admin/deleteTicket/{id}": {
+      "delete": {
+        "operationId": "AddressController_deleteTicket",
+        "summary": "Delete Ticket",
+        "tags": [
+          "Admin (NestJS)"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAddressDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Address retrieved successfully",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized - Invalid or missing token"
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
       }
     }
   },
@@ -377,14 +757,23 @@
           }
         }
       },
-      "CreateOrderDto": {
+      "CreateAddressDto": {
         "type": "object",
         "properties": {
-          "productId": {
+          "addressLine": {
             "type": "string"
           },
-          "quantity": {
-            "type": "integer"
+          "city": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "postalCode": {
+            "type": "string"
+          },
+          "county": {
+            "type": "string"
           }
         }
       }
