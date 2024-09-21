@@ -102,7 +102,6 @@ export class AuthService {
         accessToken,
         refreshToken,
         email: user.email,
-        cacheStrategy: { ttl: 10 },
       };
     } catch (error) {
       console.log(error);

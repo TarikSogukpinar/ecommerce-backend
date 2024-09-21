@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import { withAccelerate } from '@prisma/extension-accelerate';
+import { withOptimize } from '@prisma/extension-optimize';
 
 @Injectable()
 export class PrismaService
@@ -9,6 +10,12 @@ export class PrismaService
   implements OnModuleInit, OnModuleDestroy
 {
   constructor(private configService: ConfigService) {
+    const prisma = new PrismaClient().$extends(withAccelerate()).$extends(
+      withOptimize({
+        apiKey: configService.get<string>('OPTIMIZE_API_KEY'),
+      }),
+    );
+
     super({
       datasources: {
         db: {
@@ -17,7 +24,7 @@ export class PrismaService
       },
     });
 
-    this.$extends(withAccelerate());
+    Object.assign(this, prisma);
   }
 
   async onModuleInit() {
