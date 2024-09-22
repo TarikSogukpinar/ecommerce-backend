@@ -9,7 +9,7 @@
   "servers": [
     {
       "url": "https://mock-api.tariksogukpinar.dev",
-      "description": "Local development server"
+      "description": "Development server"
     }
   ],
   "tags": [
@@ -43,6 +43,10 @@
     },
     {
       "name": "Orders (Go)",
+      "description": "Order-related operations in Go microservice"
+    },
+    {
+      "name": "Category (Go)",
       "description": "Order-related operations in Go microservice"
     }
   ],
@@ -177,7 +181,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "example": "b2189bdd-890f-4b07-bd81-d30fcc89dada"
             },
             "description": "User ID"
           }
@@ -286,7 +291,7 @@
       }
     },
     "/nest/api/v1/address/createAddress": {
-      "put": {
+      "post": {
         "operationId": "AddressController_createAddress",
         "summary": "Create address",
         "tags": [
@@ -321,22 +326,24 @@
       }
     },
     "/nest/api/v1/address/userAddress/{userId}": {
-      "put": {
+      "get": {
         "operationId": "AddressController_getAllAddressesForUsers",
         "summary": "Get All Addresses For User",
         "tags": [
           "Address (NestJS)"
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateAddressDto"
-              }
-            }
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "b2189bdd-890f-4b07-bd81-d30fcc89dada"
+            },
+            "description": "User ID"
           }
-        },
+        ],
         "responses": {
           "200": {
             "description": "Address retrieved successfully",
@@ -361,6 +368,26 @@
         "summary": "Update Address",
         "tags": [
           "Address (NestJS)"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "User ID"
+          },
+          {
+            "name": "addressId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Address ID"
+          }
         ],
         "requestBody": {
           "required": true,
@@ -395,16 +422,26 @@
         "tags": [
           "Address (NestJS)"
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateAddressDto"
-              }
-            }
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "User ID"
+          },
+          {
+            "name": "addressId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Address ID"
           }
-        },
+        ],
         "responses": {
           "200": {
             "description": "Address deleted successfully",
@@ -424,8 +461,8 @@
       }
     },
     "/nest/api/v1/support/createSupportTicket": {
-      "put": {
-        "operationId": "AddressController_updateAddress",
+      "post": {
+        "operationId": "SupportController_createSupportTicket",
         "summary": "Create Support Ticket",
         "tags": [
           "Support (NestJS)"
@@ -435,47 +472,14 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateAddressDto"
+                "$ref": "#/components/schemas/CreateSupportTicketDto"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Address retrieved successfully",
-            "content": {
-              "application/json": {}
-            }
-          }
-        },
-        "401": {
-          "description": "Unauthorized - Invalid or missing token"
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
-      },
-      "delete": {
-        "operationId": "AddressController_deleteAddress",
-        "summary": "Delete Support",
-        "tags": [
-          "Support (NestJS)"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateAddressDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Address deleted successfully",
+            "description": "Create Support successfully",
             "content": {
               "application/json": {}
             }
@@ -560,25 +564,35 @@
       }
     },
     "/nest/api/v1/support/getTicketDetails/{ticketId}/user/{userId}": {
-      "put": {
-        "operationId": "AddressController_getMyTickets",
-        "summary": "Get My Tickets",
+      "get": {
+        "operationId": "AddressController_getMyTicketsDetails",
+        "summary": "Get My Tickets Details",
         "tags": [
           "Support (NestJS)"
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateAddressDto"
-              }
-            }
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "User ID"
+          },
+          {
+            "name": "ticketId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Ticket ID"
           }
-        },
+        ],
         "responses": {
           "200": {
-            "description": "Address retrieved successfully",
+            "description": "Ticket retrieved successfully",
             "content": {
               "application/json": {}
             }
@@ -595,25 +609,15 @@
       }
     },
     "/nest/api/v1/admin/getAllTickets": {
-      "put": {
+      "get": {
         "operationId": "AddressController_getAllTickets",
         "summary": "Get All Tickets",
         "tags": [
           "Admin (NestJS)"
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateAddressDto"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
-            "description": "Address retrieved successfully",
+            "description": "All Tickets retrieved successfully",
             "content": {
               "application/json": {}
             }
@@ -698,6 +702,41 @@
           }
         ]
       }
+    },
+    "/go/api/v1/products": {
+      "post": {
+        "operationId": "ProductController_createProduct",
+        "summary": "Create Product",
+        "tags": [
+          "Products (Go)"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/createProductDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Address retrieved successfully",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized - Invalid or missing token"
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -757,22 +796,75 @@
           }
         }
       },
+      "CreateSupportTicketDto": {
+        "type": "object",
+        "properties": {
+          "subject": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
       "CreateAddressDto": {
         "type": "object",
         "properties": {
-          "addressLine": {
+          "subject": {
             "type": "string"
           },
-          "city": {
+          "description": {
             "type": "string"
           },
-          "state": {
+          "status": {
             "type": "string"
           },
           "postalCode": {
             "type": "string"
           },
           "county": {
+            "type": "string"
+          }
+        }
+      },
+      "createProductDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Product Name",
+            "description": "Name of the product",
+            "minLength": 3,
+            "maxLength": 100
+          },
+          "description": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number"
+          },
+          "quantity": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          },
+          "category_id": {
+            "type": "string"
+          },
+          "discount_price": {
+            "type": "number"
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "stock": {
+            "type": "number"
+          },
+          "sku": {
             "type": "string"
           }
         }

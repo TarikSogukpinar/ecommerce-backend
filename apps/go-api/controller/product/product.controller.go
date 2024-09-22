@@ -4,21 +4,27 @@ import (
 	"fmt"
 	"go-api/middleware"
 	"go-api/models"
-	services "go-api/services/product"
+	categoryService "go-api/services/category"
+	productService "go-api/services/product"
 	"log"
 	"net/http"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
 type ProductController struct {
-	ProductService services.ProductService
+	ProductService  productService.ProductService
+	CategoryService categoryService.CategoryService
+	DB              *gorm.DB
 }
 
-func NewProductController(productService services.ProductService) *ProductController {
+func NewProductController(productService productService.ProductService, categoryService categoryService.CategoryService, db *gorm.DB) *ProductController {
 	return &ProductController{
-		ProductService: productService,
+		ProductService:  productService,
+		CategoryService: categoryService,
+		DB:              db,
 	}
 }
 
@@ -107,8 +113,30 @@ func (pc *ProductController) CreateProduct(c *fiber.Ctx) error {
 		})
 	}
 
-	product, err := pc.ProductService.CreateProduct(input)
+	// Check if category exists
+	category, err := pc.CategoryService.GetCategoryByID(input.CategoryID)
 	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid category ID",
+		})
+	}
+
+	// Proceed with product creation
+	product := models.Product{
+		Name:          input.Name,
+		Description:   input.Description,
+		Price:         input.Price,
+		Quantity:      input.Quantity,
+		Image:         input.Image,
+		CategoryID:    input.CategoryID,
+		Category:      *category,
+		DiscountPrice: input.DiscountPrice,
+		IsActive:      input.IsActive,
+		Stock:         input.Stock,
+		SKU:           input.SKU,
+	}
+
+	if err := pc.DB.Create(&product).Error; err != nil {
 		log.Println("Error creating product:", err)
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Could not create product",

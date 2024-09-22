@@ -1,23 +1,41 @@
 package routes
 
 import (
-	controller "go-api/controller/product"
+	categoryController "go-api/controller/category" // Category controller import
+	productController "go-api/controller/product"   // Product controller import
 	"go-api/database"
-	services "go-api/services/product"
+	categoryService "go-api/services/category" // Category service import with alias
+	productService "go-api/services/product"   // Product service import with alias
 
 	"github.com/gofiber/fiber/v2"
 )
 
 func SetupRoutes(app *fiber.App) {
-	productService := services.NewProductService(database.DB)
-	productController := controller.NewProductController(productService)
+	// Database connection
+	db := database.DB
+
+	// Product setup
+	prodService := productService.NewProductService(db)  // Product service
+	catService := categoryService.NewCategoryService(db) // Category service
+	prodController := productController.NewProductController(prodService, *catService, db)
+
+	// Category setup
+	catController := categoryController.NewCategoryController(catService)
 
 	api := app.Group("/api/v1")
 
+	// Product routes
 	productRoutes := api.Group("/products")
-	productRoutes.Get("/", productController.GetAllProducts)
-	productRoutes.Post("/", productController.CreateProduct)
-	productRoutes.Get("/:id", productController.GetProductByID)
-	productRoutes.Put("/:id", productController.UpdateProduct)
-	productRoutes.Delete("/:id", productController.DeleteProduct)
+	productRoutes.Get("/", prodController.GetAllProducts)
+	productRoutes.Post("/", prodController.CreateProduct)
+	productRoutes.Get("/:id", prodController.GetProductByID)
+	productRoutes.Put("/:id", prodController.UpdateProduct)
+	productRoutes.Delete("/:id", prodController.DeleteProduct)
+
+	// Category routes
+	categoryRoutes := api.Group("/categories")
+	categoryRoutes.Get("/", catController.GetAllCategories)
+	categoryRoutes.Post("/", catController.CreateCategory)
+	categoryRoutes.Get("/:id", catController.GetCategoryByID)
+	categoryRoutes.Delete("/:id", catController.DeleteCategory)
 }

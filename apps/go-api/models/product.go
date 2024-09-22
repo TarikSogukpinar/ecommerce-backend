@@ -11,7 +11,7 @@ type Product struct {
 	Quantity      int      `json:"quantity"`
 	Image         string   `json:"image"`
 	CategoryID    uint     `json:"category_id"`
-	Category      Category `json:"category" gorm:"foreignKey:CategoryID"`
+	Category      Category `json:"category" gorm:"foreignKey:CategoryID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"` // Foreign Key
 	DiscountPrice *float64 `json:"discount_price"`
 	IsActive      bool     `json:"is_active"`
 	Stock         int      `json:"stock"`

@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: "nest-api"
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["nest-api:3010"]
+
+  - job_name: "go-app"
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["go-app:3011"]

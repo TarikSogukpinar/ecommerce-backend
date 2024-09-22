@@ -9,6 +9,9 @@ import { AddressModule } from './address/address.module';
 import { SupportModule } from './support/support.module';
 import { AdminModule } from './admin/admin.module';
 
+import { ScheduleModule } from '@nestjs/schedule';
+import { PrometheusMetricsModule } from './utils/prometheus/prometheus.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -38,6 +41,8 @@ import { AdminModule } from './admin/admin.module';
     AddressModule,
     SupportModule,
     AdminModule,
+    ScheduleModule.forRoot(),
+    // PrometheusMetricsModule,
   ],
   controllers: [],
   providers: [],

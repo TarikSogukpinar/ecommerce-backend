@@ -8,8 +8,10 @@ import {
   Param,
   Put,
   UseGuards,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guard/auth.guard';
 import { AdminService } from './admin.service';
 import { TicketStatus } from '@prisma/client';
@@ -20,10 +22,17 @@ export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
   @Get('getAllTickets')
+  @ApiOperation({ summary: 'Get all tickets' })
+  @ApiResponse({
+    status: 200,
+    description: 'All tickets fetched successfully',
+  })
+  @ApiBody({ type: String })
+  @UsePipes(new ValidationPipe({ transform: true }))
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   async getAllTickets() {
-    const result = this.adminService.getAllTickets();
+    const result = await this.adminService.getAllTickets();
 
     return {
       message: 'Successfully fetched all tickets',
@@ -36,11 +45,11 @@ export class AdminController {
     @Param('id') ticketId: string,
     @Body('status') status: TicketStatus,
   ) {
-    return this.adminService.updateTicketStatus(ticketId, status);
+    return await this.adminService.updateTicketStatus(ticketId, status);
   }
 
   @Delete('deleteTicket/:id')
   async deleteTicket(@Param('id') ticketId: string) {
-    return this.adminService.deleteTicket(ticketId);
+    return await this.adminService.deleteTicket(ticketId);
   }
 }

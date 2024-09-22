@@ -7,7 +7,7 @@ export class AdminService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async getAllTickets(): Promise<any> {
-    return this.prismaService.supportTicket.findMany({
+    return await this.prismaService.supportTicket.findMany({
       include: {
         user: {
           select: {
