@@ -7,6 +7,7 @@ import (
 	"go-api/database"
 	"go-api/routes"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -19,8 +20,8 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/helmet"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/gofiber/fiber/v2/middleware/monitor"
 	"github.com/gofiber/swagger"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type TokenPayload struct {
@@ -54,6 +55,9 @@ func main() {
 		AppName: "Mock Store API v.1.0",
 	})
 
+	http.Handle("/metrics", promhttp.Handler())
+	http.ListenAndServe(":3011", nil)
+
 	app.Use(compress.New())
 
 	app.Use(cors.New(cors.Config{
@@ -81,8 +85,6 @@ func main() {
 	}))
 
 	routes.SetupRoutes(app)
-
-	app.Get("/metrics", monitor.New(monitor.Config{Title: "Mock API Monitoring"}))
 
 	app.Get("/swagger/*", swagger.HandlerDefault)
 

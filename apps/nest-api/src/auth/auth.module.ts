@@ -12,7 +12,8 @@ import { HttpModule } from '@nestjs/axios';
 import { HashingService } from 'src/utils/hashing/hashing.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-
+import { PrometheusModule } from '@willsoto/nestjs-prometheus';
+import { makeCounterProvider } from '@willsoto/nestjs-prometheus';
 @Module({
   imports: [
     PassportModule,
@@ -47,7 +48,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     ]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, PrismaService, JwtStrategy, HashingService],
+  providers: [
+    AuthService,
+    PrismaService,
+    JwtStrategy,
+    HashingService,
+
+  ],
   exports: [AuthService],
 })
 export class AuthModule {}

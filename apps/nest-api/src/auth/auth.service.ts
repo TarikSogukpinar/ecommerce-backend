@@ -20,7 +20,7 @@ import {
   UserAlreadyExistsException,
   UserNotFoundException,
 } from 'src/core/handler/expcetions/custom-expection';
-
+import * as client from 'prom-client';
 @Injectable()
 export class AuthService {
   constructor(
@@ -28,6 +28,7 @@ export class AuthService {
     private readonly hashingService: HashingService,
     private readonly tokenService: TokenService,
     private readonly jwtService: JwtService,
+
     @Inject('USER_SERVICE') private readonly client: ClientProxy,
   ) {}
 

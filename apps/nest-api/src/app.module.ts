@@ -8,9 +8,7 @@ import { UserModule } from './user/user.module';
 import { AddressModule } from './address/address.module';
 import { SupportModule } from './support/support.module';
 import { AdminModule } from './admin/admin.module';
-
-import { ScheduleModule } from '@nestjs/schedule';
-import { PrometheusMetricsModule } from './utils/prometheus/prometheus.module';
+import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 
 @Module({
   imports: [
@@ -34,6 +32,11 @@ import { PrometheusMetricsModule } from './utils/prometheus/prometheus.module';
         limit: 10,
       },
     ]),
+    PrometheusModule.register({
+      defaultMetrics: {
+        enabled: true,
+      },
+    }),
     AuthModule,
     UserModule,
     PrismaModule,
@@ -41,8 +44,6 @@ import { PrometheusMetricsModule } from './utils/prometheus/prometheus.module';
     AddressModule,
     SupportModule,
     AdminModule,
-    ScheduleModule.forRoot(),
-    // PrometheusMetricsModule,
   ],
   controllers: [],
   providers: [],

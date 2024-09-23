@@ -33,7 +33,6 @@ import { JwtAuthGuard } from './guards/auth.guard';
 import { GetUserByUuidDto } from './dto/requests/getUserUuid.dto';
 import { InvalidUUIDException } from 'src/core/handler/expcetions/custom-expection';
 import { OptionalJwtAuthGuard } from './guards/optionalAuth.guard';
-
 @Controller({ path: 'user', version: '1' })
 @ApiTags('Users')
 export class UserController {

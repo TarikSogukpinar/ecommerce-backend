@@ -26,6 +26,8 @@ import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from './guard/auth.guard';
 import { ClientProxy } from '@nestjs/microservices';
 import { InvalidCredentialsException } from 'src/core/handler/expcetions/custom-expection';
+import { InjectMetric } from '@willsoto/nestjs-prometheus';
+import { Counter } from 'prom-client';
 
 @Controller({ path: 'auth', version: '1' })
 @ApiTags('Auth')
