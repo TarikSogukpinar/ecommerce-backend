@@ -15,6 +15,8 @@ import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guard/auth.guard';
 import { AdminService } from './admin.service';
 import { TicketStatus } from '@prisma/client';
+import { DeleteTicketParamDto } from './dto/requests/deleteTicketParam.dto';
+import { UpdateTicketStatusParamDto } from './dto/requests/updateTicketStatusParam.dto';
 
 @Controller({ path: 'admin', version: '1' })
 @ApiTags('Admin')
@@ -41,15 +43,44 @@ export class AdminController {
   }
 
   @Put('updateTicket/:ticketId')
+  @ApiOperation({ summary: 'Update ticket status' })
+  @ApiResponse({
+    status: 200,
+    description: 'Ticket status updated successfully',
+  })
+  @ApiBody({ type: String })
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
   async updateTicketStatus(
-    @Param('id') ticketId: string,
-    @Body('status') status: TicketStatus,
+    @Param() UpdateTicketStatusParamDto: UpdateTicketStatusParamDto,
   ) {
-    return await this.adminService.updateTicketStatus(ticketId, status);
+    const result = await this.adminService.updateTicketStatus(
+      UpdateTicketStatusParamDto,
+    );
+
+    return {
+      message: 'Successfully updated ticket status',
+      result,
+    };
   }
 
   @Delete('deleteTicket/:id')
-  async deleteTicket(@Param('id') ticketId: string) {
-    return await this.adminService.deleteTicket(ticketId);
+  @ApiOperation({ summary: 'Delete ticket' })
+  @ApiResponse({
+    status: 200,
+    description: 'Ticket deleted successfully',
+  })
+  @ApiBody({ type: String })
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async deleteTicket(@Param() deleteTicketParamDto: DeleteTicketParamDto) {
+    const result = await this.adminService.deleteTicket(deleteTicketParamDto);
+
+    return {
+      message: 'Successfully deleted ticket',
+      result,
+    };
   }
 }
