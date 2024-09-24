@@ -2,7 +2,6 @@ import {
   Controller,
   Post,
   Body,
-  Req,
   UseGuards,
   UsePipes,
   ValidationPipe,
@@ -19,15 +18,12 @@ import {
   ApiBody,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { CustomRequest } from '../core/request/customRequest';
 import { RegisterUserDto } from './dto/requests/registerUser.dto';
-import { LogoutDto } from './dto/requests/logout.dto';
+import { LogoutParamsDto } from './dto/requests/logout.dto';
 import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from './guard/auth.guard';
 import { ClientProxy } from '@nestjs/microservices';
-import { InvalidCredentialsException } from 'src/core/handler/expcetions/custom-expection';
-import { InjectMetric } from '@willsoto/nestjs-prometheus';
-import { Counter } from 'prom-client';
+import { RefreshTokenParamsDto } from './dto/requests/refreshToken.dto';
 
 @Controller({ path: 'auth', version: '1' })
 @ApiTags('Auth')
@@ -86,26 +82,23 @@ export class AuthController {
   }
 
   @Post('logout')
-  @ApiOperation({ summary: 'Logout User' })
-  @ApiResponse({
-    status: 200,
-    description: 'Successfully logout',
-  })
-  @ApiBody({ type: LogoutDto })
+  @ApiBody({ type: LogoutParamsDto })
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  async logout(@Req() req: CustomRequest) {
-    const userId = req.user?.id;
-    const authHeader = req.headers['authorization'];
-    const token = authHeader ? authHeader.split(' ')[1] : null;
+  @ApiOperation({ summary: 'Logout user' })
+  @ApiResponse({
+    status: 200,
+    description: 'User logged out successfully',
+    type: LogoutParamsDto,
+  })
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async logoutUser(@Body() logoutParamDto: LogoutParamsDto) {
+    const result = await this.authService.logoutUserService(logoutParamDto);
 
-    if (!userId) throw new InvalidCredentialsException();
-
-    if (!token) throw new InvalidCredentialsException();
-
-    const result = await this.authService.logoutUserService(userId, token);
-
-    return { message: 'Logout successful', result };
+    return {
+      message: 'Successfully logout user!',
+      result,
+    };
   }
 
   @Post('refresh-token')
@@ -114,8 +107,10 @@ export class AuthController {
   @ApiBody({ type: String })
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  async refreshToken(@Body('refreshToken') refreshToken: string) {
-    const result = await this.authService.refreshTokenService(refreshToken);
+  async refreshToken(@Body() refreshTokenParamsDto: RefreshTokenParamsDto) {
+    const result = await this.authService.refreshTokenService(
+      refreshTokenParamsDto,
+    );
     return { message: 'Token refreshed', result };
   }
 }

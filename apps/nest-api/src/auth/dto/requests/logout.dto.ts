@@ -1,10 +1,12 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsUUID, IsString } from 'class-validator';
 
-export class LogoutDto {
-  @IsNumber()
+export class LogoutParamsDto {
+  @IsUUID()
   userId: string;
-}
 
+  @IsString()
+  token: string;
+}
 export class BlackListTokenLogoutDto {
   @IsString()
   token: string;
