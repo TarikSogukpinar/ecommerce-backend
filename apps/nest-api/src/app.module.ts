@@ -9,7 +9,7 @@ import { AddressModule } from './address/address.module';
 import { SupportModule } from './support/support.module';
 import { AdminModule } from './admin/admin.module';
 import { PrometheusModule } from '@willsoto/nestjs-prometheus';
-
+import { CacheModule } from '@nestjs/cache-manager';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -44,6 +44,7 @@ import { PrometheusModule } from '@willsoto/nestjs-prometheus';
     AddressModule,
     SupportModule,
     AdminModule,
+    CacheModule.register(),
   ],
   controllers: [],
   providers: [],

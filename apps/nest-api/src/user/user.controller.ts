@@ -22,7 +22,6 @@ import { CustomRequest } from 'src/core/request/customRequest';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UpdateUserDto } from './dto/requests/updateUser.dto';
 import { ChangePasswordDto } from './dto/requests/changePassword.dto';
-import { ErrorCodes } from 'src/core/handler/error/error-codes';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from 'src/utils/upload/upload.service';
 import { MailService } from 'src/core/mail/mail.service';
@@ -31,7 +30,12 @@ import { GetAllUsersPaginationDto } from './dto/requests/getAllUsersPagination.d
 import { UserService } from './user.service';
 import { JwtAuthGuard } from './guards/auth.guard';
 import { GetUserByUuidDto } from './dto/requests/getUserUuid.dto';
-import { InvalidUUIDException } from 'src/core/handler/expcetions/custom-expection';
+import {
+  InvalidCredentialsException,
+  InvalidUUIDException,
+  UserNotFoundException,
+  UserUUIDNotFoundException,
+} from 'src/core/handler/expcetions/custom-expection';
 import { OptionalJwtAuthGuard } from './guards/optionalAuth.guard';
 @Controller({ path: 'user', version: '1' })
 @ApiTags('Users')
@@ -62,15 +66,13 @@ export class UserController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @HttpCode(HttpStatus.OK)
   async getCurrentUser(@Req() req: CustomRequest) {
-    const userUuid = req.user?.uuid;
+    const userUuid = req.user.uuid;
 
-    if (!userUuid) {
-      throw new NotFoundException(ErrorCodes.InvalidCredentials);
-    }
+    if (!userUuid) throw new InvalidCredentialsException();
 
     const result = await this.userService.getUserByUuid(userUuid);
 
-    if (!result) throw new NotFoundException(ErrorCodes.UserNotFound);
+    if (!result) throw new UserNotFoundException();
 
     return { message: 'User Information retrieved successfully', result };
   }
@@ -86,19 +88,15 @@ export class UserController {
     @Param() getUserByUuidDto: GetUserByUuidDto,
     @Req() req: CustomRequest,
   ) {
-    const userId = req.user?.id;
+    const userId = req.user.id;
 
-    if (!userId) {
-      throw new UnauthorizedException(ErrorCodes.InvalidCredentials);
-    }
+    if (!userId) throw new InvalidCredentialsException();
 
-    const user = await this.userService.getUserByUuid(getUserByUuidDto.id);
+    const result = await this.userService.getUserByUuid(getUserByUuidDto.id);
 
-    if (!user) {
-      throw new NotFoundException(ErrorCodes.UserNotFound);
-    }
+    if (!result) throw new UserNotFoundException();
 
-    return user;
+    return { message: 'User retrieved successfully', result };
   }
 
   @Put(':id')
@@ -146,10 +144,10 @@ export class UserController {
     @UploadedFile() file: Express.Multer.File,
     @Req() req: CustomRequest,
   ) {
-    const userUuid = req.user?.uuid;
-    if (!userUuid) {
-      throw new Error('User UUID not found');
-    }
+    const userUuid = req.user.uuid;
+
+    if (!userUuid) throw new UserUUIDNotFoundException();
+
     const imagePath = await this.uploadService.uploadProfileImage(
       file,
       userUuid,

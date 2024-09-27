@@ -13,6 +13,7 @@ import { HashingService } from 'src/utils/hashing/hashing.service';
 import { ChangePasswordDto } from './dto/requests/changePassword.dto';
 import { GetUserUUIDResponseDto } from './dto/responses/getUserUuidResponse.dto';
 import { UpdateUserAccountStatusResponseDto } from './dto/responses/updateUserAccountStatusResponse.dto';
+import { UpdateProfileImageResponseDto } from './dto/responses/updateProfileImageResponse.dto';
 
 @Injectable()
 export class UserService {
@@ -68,182 +69,252 @@ export class UserService {
     resetToken: string,
     resetTokenExpires: Date,
   ): Promise<void> {
-    await this.prismaService.user.update({
-      where: { id: userId },
-      data: { resetToken, resetTokenExpires },
-    });
+    try {
+      await this.prismaService.user.update({
+        where: { id: userId },
+        data: { resetToken, resetTokenExpires },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'An error occurred, please try again later',
+      );
+    }
   }
 
   async findByResetToken(token: string): Promise<User | null> {
-    return this.prismaService.user.findFirst({
-      where: { resetToken: token },
-    });
+    try {
+      return this.prismaService.user.findFirst({
+        where: { resetToken: token },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'An error occurred, please try again later',
+      );
+    }
   }
 
   async clearResetToken(userId: string): Promise<void> {
-    await this.prismaService.user.update({
-      where: { id: userId },
-      data: { resetToken: null, resetTokenExpires: null },
-    });
+    try {
+      await this.prismaService.user.update({
+        where: { id: userId },
+        data: { resetToken: null, resetTokenExpires: null },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'An error occurred, please try again later',
+      );
+    }
   }
 
   async findUserByEmail(email: string): Promise<User | null> {
-    return this.prismaService.user.findUnique({
-      where: { email },
-    });
+    try {
+      return this.prismaService.user.findUnique({
+        where: { email },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'An error occurred, please try again later',
+      );
+    }
   }
 
   async resetPassword(token: string, newPassword: string): Promise<void> {
-    const user = await this.prismaService.user.findFirst({
-      where: { resetToken: token },
-    });
+    try {
+      const user = await this.prismaService.user.findFirst({
+        where: { resetToken: token },
+      });
 
-    if (
-      !user ||
-      !user.resetTokenExpires ||
-      user.resetTokenExpires < new Date()
-    ) {
-      throw new InvalidCredentialsException();
+      if (
+        !user ||
+        !user.resetTokenExpires ||
+        user.resetTokenExpires < new Date()
+      ) {
+        throw new InvalidCredentialsException();
+      }
+
+      const hashedPassword =
+        await this.hashingService.hashPassword(newPassword);
+
+      await this.prismaService.user.update({
+        where: { id: user.id },
+        data: {
+          password: hashedPassword,
+          resetToken: null,
+          resetTokenExpires: null,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'An error occurred, please try again later',
+      );
     }
-
-    const hashedPassword = await this.hashingService.hashPassword(newPassword);
-    await this.prismaService.user.update({
-      where: { id: user.id },
-      data: {
-        password: hashedPassword,
-        resetToken: null,
-        resetTokenExpires: null,
-      },
-    });
   }
 
   async changePassword(
     uuid: string,
     changePasswordDto: ChangePasswordDto,
   ): Promise<User> {
-    const user = await this.prismaService.user.findUnique({
-      where: { uuid },
-      include: {
-        PasswordHistory: {
-          orderBy: { createdAt: 'desc' },
-          take: 2,
+    try {
+      const user = await this.prismaService.user.findUnique({
+        where: { uuid },
+        include: {
+          PasswordHistory: {
+            orderBy: { createdAt: 'desc' },
+            take: 2,
+          },
         },
-      },
-    });
+      });
 
-    if (!user) {
-      throw new UserNotFoundException();
-    }
+      if (!user) {
+        throw new UserNotFoundException();
+      }
 
-    const isMatchPassword = await this.hashingService.comparePassword(
-      changePasswordDto.currentPassword,
-      user.password,
-    );
-
-    if (!isMatchPassword) throw new InvalidCredentialsException();
-
-    for (const history of user.PasswordHistory) {
-      const isOldPassword = await this.hashingService.comparePassword(
-        changePasswordDto.newPassword,
-        history.password,
+      const isMatchPassword = await this.hashingService.comparePassword(
+        changePasswordDto.currentPassword,
+        user.password,
       );
-      if (isOldPassword) throw new PassportCannotBeTheSameException();
+
+      if (!isMatchPassword) throw new InvalidCredentialsException();
+
+      for (const history of user.PasswordHistory) {
+        const isOldPassword = await this.hashingService.comparePassword(
+          changePasswordDto.newPassword,
+          history.password,
+        );
+        if (isOldPassword) throw new PassportCannotBeTheSameException();
+      }
+
+      const hashedPassword = await this.hashingService.hashPassword(
+        changePasswordDto.newPassword,
+      );
+
+      const updatedUser = await this.prismaService.user.update({
+        where: { uuid },
+        data: { password: hashedPassword },
+      });
+
+      await this.prismaService.passwordHistory.create({
+        data: {
+          userId: user.id,
+          password: user.password,
+        },
+      });
+
+      return updatedUser;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'An error occurred, please try again later',
+      );
     }
-
-    const hashedPassword = await this.hashingService.hashPassword(
-      changePasswordDto.newPassword,
-    );
-
-    const updatedUser = await this.prismaService.user.update({
-      where: { uuid },
-      data: { password: hashedPassword },
-    });
-
-    await this.prismaService.passwordHistory.create({
-      data: {
-        userId: user.id,
-        password: user.password,
-      },
-    });
-
-    return updatedUser;
   }
 
   async updateUser(id: string, data: Prisma.UserUpdateInput): Promise<User> {
-    const user = await this.prismaService.user.update({
-      where: { id },
-      data,
-    });
-    return user;
+    try {
+      const user = await this.prismaService.user.update({
+        where: { id },
+        data,
+      });
+      return user;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'An error occurred, please try again later',
+      );
+    }
   }
 
-  async updateProfileImage(userUuid: string, imagePath: string): Promise<void> {
-    const user = await this.prismaService.user.findUnique({
-      where: { uuid: userUuid },
-    });
-    if (!user) {
-      throw new UserNotFoundException();
+  async updateProfileImage(
+    userUuid: string,
+    imagePath: string,
+  ): Promise<UpdateProfileImageResponseDto> {
+    try {
+      const user = await this.prismaService.user.findUnique({
+        where: { uuid: userUuid },
+      });
+      if (!user) {
+        throw new UserNotFoundException();
+      }
+
+      await this.prismaService.profileImage.upsert({
+        where: {
+          userId: user.id,
+          uuid: userUuid,
+        },
+        create: {
+          userId: user.id,
+          uuid: userUuid,
+          imageUrl: imagePath,
+        },
+        update: {
+          imageUrl: imagePath,
+        },
+      });
+
+      await this.prismaService.user.update({
+        where: { id: user.id },
+        data: { image: imagePath },
+      });
+
+      return {
+        imageUrl: imagePath,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'An error occurred, please try again later',
+      );
     }
-
-    await this.prismaService.profileImage.upsert({
-      where: {
-        userId: user.id,
-        uuid: userUuid,
-      },
-      create: {
-        userId: user.id,
-        uuid: userUuid,
-        imageUrl: imagePath,
-      },
-      update: {
-        imageUrl: imagePath,
-      },
-    });
-
-    await this.prismaService.user.update({
-      where: { id: user.id },
-      data: { image: imagePath },
-    });
   }
 
   async getUserByUuid(uuid: string): Promise<GetUserUUIDResponseDto> {
-    const user = await this.prismaService.user.findUnique({
-      where: { uuid },
-      select: {
-        uuid: true,
-        email: true,
-        role: true,
-        name: true,
-        isActiveAccount: true,
-        createdAt: true,
-        updatedAt: true,
-        ProfileImage: {
-          select: {
-            imageUrl: true,
+    try {
+      const user = await this.prismaService.user.findUnique({
+        where: { uuid },
+        select: {
+          uuid: true,
+          email: true,
+          role: true,
+          name: true,
+          isActiveAccount: true,
+          createdAt: true,
+          updatedAt: true,
+          ProfileImage: {
+            select: {
+              imageUrl: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    if (!user) {
-      throw new UserNotFoundException();
+      if (!user) throw new UserNotFoundException();
+
+      const imageUrl =
+        user.ProfileImage?.length > 0 ? user.ProfileImage[0].imageUrl : null;
+
+      const userDto: GetUserUUIDResponseDto = {
+        uuid: user.uuid,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        isActiveAccount: user.isActiveAccount,
+        imageUrl: imageUrl || '',
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
+      };
+
+      return userDto;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'An error occurred, please try again later',
+      );
     }
-
-    const imageUrl =
-      user.ProfileImage?.length > 0 ? user.ProfileImage[0].imageUrl : null;
-
-    const userDto: GetUserUUIDResponseDto = {
-      uuid: user.uuid,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      isActiveAccount: user.isActiveAccount,
-      imageUrl: imageUrl || '',
-      createdAt: user.createdAt.toISOString(),
-      updatedAt: user.updatedAt.toISOString(),
-    };
-
-    return userDto;
   }
 
   async updateUserAccountStatus(

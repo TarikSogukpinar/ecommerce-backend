@@ -2,6 +2,11 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 import { ImageProcessingService } from '../image/image-process.service';
+import {
+  FileIsTooLargeException,
+  InvalidFileException,
+  NoFileProvided,
+} from 'src/core/handler/expcetions/custom-expection';
 
 @Injectable()
 export class UploadService {
@@ -21,19 +26,12 @@ export class UploadService {
     file: Express.Multer.File,
     userUuid: string,
   ): Promise<string> {
-    if (!file) {
-      throw new BadRequestException('No file provided');
-    }
+    if (!file) throw new NoFileProvided();
 
-    if (!this.allowedMimeTypes.includes(file.mimetype)) {
-      throw new BadRequestException(
-        'Invalid file type. Only image files are allowed.',
-      );
-    }
+    if (!this.allowedMimeTypes.includes(file.mimetype))
+      throw new InvalidFileException();
 
-    if (file.size > this.maxFileSize) {
-      throw new BadRequestException('File is too large. Maximum size is 2 MB.');
-    }
+    if (file.size > this.maxFileSize) throw new FileIsTooLargeException();
 
     const uploadDir = path.join(process.cwd(), 'uploads', 'profiles');
 
@@ -49,7 +47,11 @@ export class UploadService {
       256,
       256,
     );
-    await this.imageProcessingService.saveImage(resizedBuffer, filePath);
+
+    const saveImage = await this.imageProcessingService.saveImage(
+      resizedBuffer,
+      filePath,
+    );
 
     return `/uploads/profiles/${uniqueFileName}`;
   }

@@ -90,6 +90,12 @@ export class UnauthorizedAccessException extends HttpException {
   }
 }
 
+export class UserUUIDNotFoundException extends HttpException {
+  constructor() {
+    super('User UUID not found', HttpStatus.NOT_FOUND);
+  }
+}
+
 export class InvalidUUIDException extends HttpException {
   constructor() {
     super('Invalid UUID', HttpStatus.BAD_REQUEST);
@@ -123,5 +129,26 @@ export class NoAddressesFoundForUserException extends HttpException {
 export class TicketNotFoundException extends HttpException {
   constructor() {
     super('Ticket not found', HttpStatus.NOT_FOUND);
+  }
+}
+
+export class NoFileProvided extends HttpException {
+  constructor() {
+    super('No file provided', HttpStatus.BAD_REQUEST);
+  }
+}
+
+export class InvalidFileException extends HttpException {
+  constructor() {
+    super(
+      'Invalid file type. Only image files are allowed.',
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+}
+
+export class FileIsTooLargeException extends HttpException {
+  constructor() {
+    super('File is too large. Maximum size is 2 MB.', HttpStatus.BAD_REQUEST);
   }
 }

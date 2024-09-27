@@ -15,7 +15,9 @@ import { SwaggerService } from './core/swagger/swagger.service';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: console,
+  });
   const configService = app.get(ConfigService);
 
   app.setGlobalPrefix(
