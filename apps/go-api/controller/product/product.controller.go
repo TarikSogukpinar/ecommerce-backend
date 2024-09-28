@@ -8,6 +8,7 @@ import (
 	productService "go-api/services/product"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -199,4 +200,69 @@ func (pc *ProductController) DeleteProduct(c *fiber.Ctx) error {
 	}
 
 	return c.SendStatus(http.StatusNoContent)
+}
+
+// GetNewProducts returns newly added products
+func (pc *ProductController) GetNewProducts(c *fiber.Ctx) error {
+	products, err := pc.ProductService.GetNewProducts()
+	if err != nil {
+		log.Println("Error fetching new products:", err)
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Could not fetch new products",
+		})
+	}
+	return c.Status(http.StatusOK).JSON(products)
+}
+
+func (pc *ProductController) FilterProductsByPrice(c *fiber.Ctx) error {
+	minPrice, err := strconv.ParseFloat(c.Query("minPrice"), 64)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid minPrice",
+		})
+	}
+	maxPrice, err := strconv.ParseFloat(c.Query("maxPrice"), 64)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid maxPrice",
+		})
+	}
+
+	products, err := pc.ProductService.FilterProductsByPrice(minPrice, maxPrice)
+	if err != nil {
+		log.Println("Error fetching products by price:", err)
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Could not fetch products",
+		})
+	}
+	return c.Status(http.StatusOK).JSON(products)
+}
+
+func (pc *ProductController) GetLowStockProducts(c *fiber.Ctx) error {
+	threshold, err := strconv.Atoi(c.Query("stockThreshold"))
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid stock threshold",
+		})
+	}
+
+	products, err := pc.ProductService.GetLowStockProducts(threshold)
+	if err != nil {
+		log.Println("Error fetching low stock products:", err)
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Could not fetch low stock products",
+		})
+	}
+	return c.Status(http.StatusOK).JSON(products)
+}
+
+func (pc *ProductController) GetDiscountedProducts(c *fiber.Ctx) error {
+	products, err := pc.ProductService.GetDiscountedProducts()
+	if err != nil {
+		log.Println("Error fetching discounted products:", err)
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Could not fetch discounted products",
+		})
+	}
+	return c.Status(http.StatusOK).JSON(products)
 }

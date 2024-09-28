@@ -1,5 +1,4 @@
 import {
-  Body,
   Controller,
   Delete,
   Get,
@@ -14,7 +13,6 @@ import {
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guard/auth.guard';
 import { AdminService } from './admin.service';
-import { TicketStatus } from '@prisma/client';
 import { DeleteTicketParamDto } from './dto/requests/deleteTicketParam.dto';
 import { UpdateTicketStatusParamDto } from './dto/requests/updateTicketStatusParam.dto';
 

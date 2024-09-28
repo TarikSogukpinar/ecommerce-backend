@@ -1,9 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import { PrismaService } from '../../database/database.service';
-import { ErrorCodes } from '../handler/error/error-codes';
+import { UnauthorizedAccessException } from '../handler/expcetions/custom-expection';
 
 @Injectable()
 export class TokenService {
@@ -19,48 +19,78 @@ export class TokenService {
       const decoded = await this.jwtService.verify(token, { secret });
 
       const isBlacklisted = await this.isTokenBlacklisted(token);
-      if (isBlacklisted) {
-        throw new UnauthorizedException(ErrorCodes.InvalidToken);
-      }
+
+      if (isBlacklisted) throw new UnauthorizedAccessException();
 
       return decoded;
     } catch (error) {
-      throw new UnauthorizedException(ErrorCodes.InvalidToken);
+      console.log(error);
+      throw new InternalServerErrorException(
+        'An error occurred, please try again later',
+      );
     }
   }
 
   async createPasswordResetToken(user: User) {
-    const secret = this.configService.get<string>('JWT_SECRET');
-    const passwordResetExpiresIn = this.configService.get<string>(
-      'PASSWORD_RESET_EXPIRES_IN',
-    );
-    return this.jwtService.sign(
-      { email: user.email, id: user.id, type: 'passwordReset' },
-      { secret, expiresIn: passwordResetExpiresIn },
-    );
+    try {
+      const secret = this.configService.get<string>('JWT_SECRET');
+      const passwordResetExpiresIn = this.configService.get<string>(
+        'PASSWORD_RESET_EXPIRES_IN',
+      );
+      return this.jwtService.sign(
+        { email: user.email, id: user.id, type: 'passwordReset' },
+        { secret, expiresIn: passwordResetExpiresIn },
+      );
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'An error occurred, please try again later',
+      );
+    }
   }
 
   async createAccessToken(user: User) {
-    const payload = {
-      id: user.id,
-    };
-    return this.jwtService.sign(payload, {
-      noTimestamp: true
-    });
+    try {
+      const payload = {
+        id: user.id,
+      };
+      return this.jwtService.sign(payload, {
+        noTimestamp: true,
+      });
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'An error occurred, please try again later',
+      );
+    }
   }
 
   async createRefreshToken(user: User) {
-    const payload = { email: user.email };
-    return this.jwtService.sign(payload, {
-      noTimestamp: true
-    });
+    try {
+      const payload = { email: user.email };
+      return this.jwtService.sign(payload, {
+        noTimestamp: true,
+      });
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'An error occurred, please try again later',
+      );
+    }
   }
 
   async updateRefreshToken(user: User, token: string) {
-    await this.prismaService.user.update({
-      where: { id: user.id },
-      data: { refreshToken: token },
-    });
+    try {
+      await this.prismaService.user.update({
+        where: { id: user.id },
+        data: { refreshToken: token },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'An error occurred, please try again later',
+      );
+    }
   }
 
   async refreshAccessToken(refreshToken: string): Promise<string> {
@@ -70,19 +100,22 @@ export class TokenService {
         secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
       });
       userEmail = decoded.email;
+
+      const user = await this.prismaService.user.findUnique({
+        where: { email: userEmail },
+      });
+
+      if (!user || user.refreshToken !== refreshToken) {
+        throw new UnauthorizedAccessException();
+      }
+
+      return this.createAccessToken(user);
     } catch (error) {
-      throw new UnauthorizedException(ErrorCodes.InvalidToken);
+      console.log(error);
+      throw new InternalServerErrorException(
+        'An error occurred, please try again later',
+      );
     }
-
-    const user = await this.prismaService.user.findUnique({
-      where: { email: userEmail },
-    });
-
-    if (!user || user.refreshToken !== refreshToken) {
-      throw new UnauthorizedException(ErrorCodes.InvalidToken);
-    }
-
-    return this.createAccessToken(user);
   }
 
   async blacklistToken(token: string): Promise<void> {
@@ -94,16 +127,25 @@ export class TokenService {
         data: { token, expiresAt },
       });
     } catch (error) {
-      console.error('Error in blacklistToken:', error);
-      throw new UnauthorizedException(ErrorCodes.InvalidToken);
+      console.log(error);
+      throw new InternalServerErrorException(
+        'An error occurred, please try again later',
+      );
     }
   }
 
   async isTokenBlacklisted(token: string): Promise<boolean> {
-    const blacklisted = await this.prismaService.blacklistedToken.findUnique({
-      where: { token },
-    });
+    try {
+      const blacklisted = await this.prismaService.blacklistedToken.findUnique({
+        where: { token },
+      });
 
-    return !!blacklisted;
+      return !!blacklisted;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'An error occurred, please try again later',
+      );
+    }
   }
 }

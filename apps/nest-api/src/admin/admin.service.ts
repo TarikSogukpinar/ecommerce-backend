@@ -1,6 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from 'src/database/database.service';
-import { TicketStatus } from '@prisma/client';
 import { GetAllTicketsResponseDto } from './dto/responses/getAllTicketsResponse.dto';
 import { TicketNotFoundException } from 'src/core/handler/expcetions/custom-expection';
 import { UpdateTicketResponseDto } from './dto/responses/updateTicketStatusResponse.dto';

@@ -130,16 +130,25 @@ export class UserController {
   ) {
     const userUuid = req.user?.uuid;
 
-    if (!userUuid) {
-      throw new UnauthorizedException('You can only change your own password');
-    }
+    if (!userUuid) throw new UnauthorizedException();
 
-    return this.userService.changePassword(userUuid, changePasswordDto);
+    const result = await this.userService.changePassword(
+      userUuid,
+      changePasswordDto,
+    );
+
+    return {
+      message: 'Password changed successfully',
+      result,
+    };
   }
 
   @Post('upload-avatar')
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Upload user avatar' })
+  @ApiResponse({ status: 200, description: 'Avatar uploaded successfully' })
   @UseInterceptors(FileInterceptor('file'))
+  @HttpCode(HttpStatus.OK)
   async uploadAvatar(
     @UploadedFile() file: Express.Multer.File,
     @Req() req: CustomRequest,
@@ -155,20 +164,24 @@ export class UserController {
 
     await this.userService.updateProfileImage(userUuid, imagePath);
 
-    return { imageUrl: imagePath };
+    return { imageUrl: imagePath, message: 'Avatar uploaded successfully' };
   }
 
   @Post('forgot-password')
-  async forgotPassword(@Body('email') email: string): Promise<void> {
-    await this.passwordResetService.sendPasswordResetLink(email);
+  async forgotPassword(@Body('email') email: string) {
+    const result = await this.passwordResetService.sendPasswordResetLink(email);
+
+    return { message: 'Password reset link sent successfully', result };
   }
 
   @Post('reset-password')
   async resetPassword(
     @Body('token') token: string,
     @Body('newPassword') newPassword: string,
-  ): Promise<void> {
-    await this.userService.resetPassword(token, newPassword);
+  ) {
+    const result = await this.userService.resetPassword(token, newPassword);
+
+    return { message: 'Password reset successfully', result };
   }
 
   @Patch('deactivate-account')

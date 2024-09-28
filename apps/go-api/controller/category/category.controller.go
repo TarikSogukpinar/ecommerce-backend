@@ -20,6 +20,14 @@ func NewCategoryController(categoryService *services.CategoryService) *CategoryC
 	}
 }
 
+// GetAllCategories godoc
+// @Summary      Get all categories
+// @Description  Fetch all categories
+// @Tags         Categories
+// @Accept       json
+// @Produce      json
+// @Success      200  {array}  models.Category
+// @Router       /categories [get]
 func (cc *CategoryController) GetAllCategories(c *fiber.Ctx) error {
 	categories, err := cc.CategoryService.GetAllCategories()
 	if err != nil {
@@ -31,6 +39,16 @@ func (cc *CategoryController) GetAllCategories(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(categories)
 }
 
+// CreateCategory godoc
+// @Summary      Create a new category
+// @Description  Create a new category in the system
+// @Tags         Categories
+// @Accept       json
+// @Produce      json
+// @Param        category  body      models.Category  true  "Category body"
+// @Success      201  {object}  models.Category
+// @Failure      400  {object}  map[string]string
+// @Router       /categories [post]
 func (cc *CategoryController) CreateCategory(c *fiber.Ctx) error {
 	var category models.Category
 
@@ -52,6 +70,17 @@ func (cc *CategoryController) CreateCategory(c *fiber.Ctx) error {
 	return c.Status(http.StatusCreated).JSON(newCategory)
 }
 
+// GetCategoryByID godoc
+// @Summary      Get category by ID
+// @Description  Fetch category details by ID
+// @Tags         Categories
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "Category ID"
+// @Success      200  {object}  models.Category
+// @Failure      400  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Router       /categories/{id} [get]
 func (cc *CategoryController) GetCategoryByID(c *fiber.Ctx) error {
 	id, err := strconv.ParseUint(c.Params("id"), 10, 32)
 	if err != nil {
@@ -71,6 +100,15 @@ func (cc *CategoryController) GetCategoryByID(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(category)
 }
 
+// DeleteCategory godoc
+// @Summary      Delete a category
+// @Description  Remove a category by ID
+// @Tags         Categories
+// @Param        id   path      int  true  "Category ID"
+// @Success      204  "No Content"
+// @Failure      400  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Router       /categories/{id} [delete]
 func (cc *CategoryController) DeleteCategory(c *fiber.Ctx) error {
 	id, err := strconv.ParseUint(c.Params("id"), 10, 32)
 	if err != nil {

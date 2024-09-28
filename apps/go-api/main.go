@@ -1,13 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"go-api/config"
 	"go-api/core/rabbitmq"
 	"go-api/database"
 	"go-api/routes"
 	"log"
-	"net/http"
 	"os"
 	"time"
 
@@ -21,7 +21,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/swagger"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type TokenPayload struct {
@@ -30,9 +29,9 @@ type TokenPayload struct {
 	Email        string `json:"email"`
 }
 
-type Message struct {
-	Result TokenPayload `json:"result"`
-}
+// type Message struct {
+// 	Result TokenPayload `json:"result"`
+// }
 
 // @title Mock-API Swagger Example API
 // @version 1.0
@@ -52,11 +51,13 @@ func main() {
 	config.LoadConfig()
 
 	app := fiber.New(fiber.Config{
-		AppName: "Mock Store API v.1.0",
+		AppName:     "Mock Store API v.1.0",
+		JSONEncoder: json.Marshal,
+		JSONDecoder: json.Unmarshal,
 	})
 
-	http.Handle("/metrics", promhttp.Handler())
-	http.ListenAndServe(":3011", nil)
+	// http.Handle("/metrics", promhttp.Handler())
+	// http.ListenAndServe(":3011", nil)
 
 	app.Use(compress.New())
 

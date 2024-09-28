@@ -8,10 +8,14 @@ import (
 
 type ProductService interface {
 	GetAllProducts() ([]models.Product, error)
+	GetPopularProducts() ([]models.Product, error)
 	GetProductByID(id string) (models.Product, error)
-	CreateProduct(input models.ProductCreateInput) (models.Product, error)
+	FilterProductsByPrice(minPrice, maxPrice float64) ([]models.Product, error)
+	GetLowStockProducts(stockThreshold int) ([]models.Product, error)
+	GetDiscountedProducts() ([]models.Product, error)
 	UpdateProduct(id string, input models.ProductUpdateInput) (models.Product, error)
 	DeleteProduct(id string) error
+	GetNewProducts() ([]models.Product, error)
 }
 
 // productService implements ProductService
@@ -22,6 +26,22 @@ type productService struct {
 // NewProductService creates a new product service
 func NewProductService(db *gorm.DB) ProductService {
 	return &productService{db: db}
+}
+
+func (s *productService) GetNewProducts() ([]models.Product, error) {
+	var products []models.Product
+	if err := s.db.Order("created_at desc").Limit(10).Find(&products).Error; err != nil {
+		return nil, err
+	}
+	return products, nil
+}
+
+func (s *productService) GetPopularProducts() ([]models.Product, error) {
+	var products []models.Product
+	if err := s.db.Order("sales_count desc").Limit(10).Find(&products).Error; err != nil {
+		return nil, err
+	}
+	return products, nil
 }
 
 // GetAllProducts fetches all products from the database
@@ -74,4 +94,29 @@ func (s *productService) DeleteProduct(id string) error {
 		return err
 	}
 	return nil
+}
+
+// FilterProductsByPrice filters products by price range
+func (s *productService) FilterProductsByPrice(minPrice, maxPrice float64) ([]models.Product, error) {
+	var products []models.Product
+	if err := s.db.Where("price >= ? AND price <= ?", minPrice, maxPrice).Find(&products).Error; err != nil {
+		return nil, err
+	}
+	return products, nil
+}
+
+func (s *productService) GetDiscountedProducts() ([]models.Product, error) {
+	var products []models.Product
+	if err := s.db.Where("discount_price IS NOT NULL").Find(&products).Error; err != nil {
+		return nil, err
+	}
+	return products, nil
+}
+
+func (s *productService) GetLowStockProducts(stockThreshold int) ([]models.Product, error) {
+	var products []models.Product
+	if err := s.db.Where("stock <= ?", stockThreshold).Find(&products).Error; err != nil {
+		return nil, err
+	}
+	return products, nil
 }
