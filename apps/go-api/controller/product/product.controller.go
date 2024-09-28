@@ -202,7 +202,14 @@ func (pc *ProductController) DeleteProduct(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
-// GetNewProducts returns newly added products
+// GetNewProducts godoc
+// @Summary      Get new products
+// @Description  Returns newly added products
+// @Tags         Products
+// @Accept       json
+// @Produce      json
+// @Success      200  {array}  models.Product
+// @Router       /products/new [get]
 func (pc *ProductController) GetNewProducts(c *fiber.Ctx) error {
 	products, err := pc.ProductService.GetNewProducts()
 	if err != nil {
@@ -214,6 +221,16 @@ func (pc *ProductController) GetNewProducts(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(products)
 }
 
+// FilterProductsByPrice godoc
+// @Summary      Filter products by price range
+// @Description  Filters products by minimum and maximum price
+// @Tags         Products
+// @Accept       json
+// @Produce      json
+// @Param        minPrice  query   number  true  "Minimum Price"
+// @Param        maxPrice  query   number  true  "Maximum Price"
+// @Success      200  {array}  models.Product
+// @Router       /products/filter-by-price [get]
 func (pc *ProductController) FilterProductsByPrice(c *fiber.Ctx) error {
 	minPrice, err := strconv.ParseFloat(c.Query("minPrice"), 64)
 	if err != nil {
@@ -238,6 +255,15 @@ func (pc *ProductController) FilterProductsByPrice(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(products)
 }
 
+// GetLowStockProducts godoc
+// @Summary      Get low stock products
+// @Description  Returns products with stock below a specified threshold
+// @Tags         Products
+// @Accept       json
+// @Produce      json
+// @Param        stockThreshold  query   int  true  "Stock Threshold"
+// @Success      200  {array}  models.Product
+// @Router       /products/low-stock [get]
 func (pc *ProductController) GetLowStockProducts(c *fiber.Ctx) error {
 	threshold, err := strconv.Atoi(c.Query("stockThreshold"))
 	if err != nil {
@@ -256,6 +282,14 @@ func (pc *ProductController) GetLowStockProducts(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(products)
 }
 
+// GetDiscountedProducts godoc
+// @Summary      Get discounted products
+// @Description  Returns products that are discounted
+// @Tags         Products
+// @Accept       json
+// @Produce      json
+// @Success      200  {array}  models.Product
+// @Router       /products/discounted [get]
 func (pc *ProductController) GetDiscountedProducts(c *fiber.Ctx) error {
 	products, err := pc.ProductService.GetDiscountedProducts()
 	if err != nil {
