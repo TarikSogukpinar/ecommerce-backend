@@ -19,6 +19,8 @@ type Product struct {
 }
 
 type ProductCreateInput struct {
+	gorm.Model    `json:"-" swaggerignore:"true"`
+	ID            uint     `json:"id" gorm:"primaryKey"`
 	Name          string   `json:"name"`
 	Description   string   `json:"description"`
 	Price         float64  `json:"price"`
@@ -32,6 +34,8 @@ type ProductCreateInput struct {
 }
 
 type ProductUpdateInput struct {
+	gorm.Model    `json:"-" swaggerignore:"true"`
+	ID            uint     `json:"id" gorm:"primaryKey"`
 	Name          string   `json:"name,omitempty"`
 	Description   string   `json:"description,omitempty"`
 	Price         float64  `json:"price,omitempty"`

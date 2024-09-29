@@ -81,17 +81,20 @@ func (pc *ProductController) GetAllProducts(c *fiber.Ctx) error {
 // @Success      201  {object}  models.Product
 // @Router       /products [post]
 func (pc *ProductController) GetProductByID(c *fiber.Ctx) error {
+
 	id := c.Params("id")
 
 	product, err := pc.ProductService.GetProductByID(id)
 	if err != nil {
-		log.Println("Error fetching product:", err)
-		return c.Status(http.StatusNotFound).JSON(fiber.Map{
+
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error": "Product not found",
 		})
 	}
 
-	return c.Status(http.StatusOK).JSON(product)
+	fmt.Print("Product:", product)
+
+	return c.Status(fiber.StatusOK).JSON(product)
 }
 
 // CreateProduct godoc
@@ -114,7 +117,6 @@ func (pc *ProductController) CreateProduct(c *fiber.Ctx) error {
 		})
 	}
 
-	// Check if category exists
 	category, err := pc.CategoryService.GetCategoryByID(input.CategoryID)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
@@ -122,8 +124,8 @@ func (pc *ProductController) CreateProduct(c *fiber.Ctx) error {
 		})
 	}
 
-	// Proceed with product creation
 	product := models.Product{
+		ID:            input.ID,
 		Name:          input.Name,
 		Description:   input.Description,
 		Price:         input.Price,
@@ -199,104 +201,43 @@ func (pc *ProductController) DeleteProduct(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.SendStatus(http.StatusNoContent)
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"message": "Product deleted successfully",
+	})
 }
 
-// GetNewProducts godoc
-// @Summary      Get new products
-// @Description  Returns newly added products
-// @Tags         Products
-// @Accept       json
-// @Produce      json
-// @Success      200  {array}  models.Product
-// @Router       /products/new [get]
-func (pc *ProductController) GetNewProducts(c *fiber.Ctx) error {
-	products, err := pc.ProductService.GetNewProducts()
-	if err != nil {
-		log.Println("Error fetching new products:", err)
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Could not fetch new products",
-		})
-	}
-	return c.Status(http.StatusOK).JSON(products)
-}
+func (pc *ProductController) GetProductsByPriceRange(c *fiber.Ctx) error {
+	minPrice := c.Query("min_price")
+	maxPrice := c.Query("max_price")
 
-// FilterProductsByPrice godoc
-// @Summary      Filter products by price range
-// @Description  Filters products by minimum and maximum price
-// @Tags         Products
-// @Accept       json
-// @Produce      json
-// @Param        minPrice  query   number  true  "Minimum Price"
-// @Param        maxPrice  query   number  true  "Maximum Price"
-// @Success      200  {array}  models.Product
-// @Router       /products/filter-by-price [get]
-func (pc *ProductController) FilterProductsByPrice(c *fiber.Ctx) error {
-	minPrice, err := strconv.ParseFloat(c.Query("minPrice"), 64)
-	if err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid minPrice",
-		})
-	}
-	maxPrice, err := strconv.ParseFloat(c.Query("maxPrice"), 64)
-	if err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid maxPrice",
+	if minPrice == "" || maxPrice == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Both min_price and max_price must be provided",
 		})
 	}
 
-	products, err := pc.ProductService.FilterProductsByPrice(minPrice, maxPrice)
+	min, err := strconv.ParseFloat(minPrice, 64)
 	if err != nil {
-		log.Println("Error fetching products by price:", err)
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Could not fetch products",
-		})
-	}
-	return c.Status(http.StatusOK).JSON(products)
-}
-
-// GetLowStockProducts godoc
-// @Summary      Get low stock products
-// @Description  Returns products with stock below a specified threshold
-// @Tags         Products
-// @Accept       json
-// @Produce      json
-// @Param        stockThreshold  query   int  true  "Stock Threshold"
-// @Success      200  {array}  models.Product
-// @Router       /products/low-stock [get]
-func (pc *ProductController) GetLowStockProducts(c *fiber.Ctx) error {
-	threshold, err := strconv.Atoi(c.Query("stockThreshold"))
-	if err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid stock threshold",
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid min_price",
 		})
 	}
 
-	products, err := pc.ProductService.GetLowStockProducts(threshold)
+	max, err := strconv.ParseFloat(maxPrice, 64)
 	if err != nil {
-		log.Println("Error fetching low stock products:", err)
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Could not fetch low stock products",
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid max_price",
 		})
 	}
-	return c.Status(http.StatusOK).JSON(products)
-}
 
-// GetDiscountedProducts godoc
-// @Summary      Get discounted products
-// @Description  Returns products that are discounted
-// @Tags         Products
-// @Accept       json
-// @Produce      json
-// @Success      200  {array}  models.Product
-// @Router       /products/discounted [get]
-func (pc *ProductController) GetDiscountedProducts(c *fiber.Ctx) error {
-	products, err := pc.ProductService.GetDiscountedProducts()
+	fmt.Println("Min:", min, "Max:", max)
+
+	products, err := pc.ProductService.GetProductsByPriceRangeService(min, max)
 	if err != nil {
-		log.Println("Error fetching discounted products:", err)
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Could not fetch discounted products",
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to fetch products",
 		})
 	}
-	return c.Status(http.StatusOK).JSON(products)
+
+	return c.JSON(products)
 }

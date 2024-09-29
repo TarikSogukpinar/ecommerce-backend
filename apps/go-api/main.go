@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"go-api/config"
 	"go-api/core/rabbitmq"
@@ -51,9 +50,7 @@ func main() {
 	config.LoadConfig()
 
 	app := fiber.New(fiber.Config{
-		AppName:     "Mock Store API v.1.0",
-		JSONEncoder: json.Marshal,
-		JSONDecoder: json.Unmarshal,
+		AppName: "Mock Store API v.1.0",
 	})
 
 	// http.Handle("/metrics", promhttp.Handler())

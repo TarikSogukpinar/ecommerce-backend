@@ -704,6 +704,32 @@
       }
     },
     "/go/api/v1/products": {
+      "get": {
+        "operationId": "ProductController_getAllProduct",
+        "summary": "Get All Product",
+        "tags": [
+          "Products (Go)"
+        ],
+        "requestBody": {
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "All Products retrieved successfully",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized - Invalid or missing token"
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
       "post": {
         "operationId": "ProductController_createProduct",
         "summary": "Create Product",
@@ -722,7 +748,115 @@
         },
         "responses": {
           "200": {
-            "description": "Address retrieved successfully",
+            "description": "Create product retrieved successfully",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized - Invalid or missing token"
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "put": {
+        "operationId": "ProductController_updateProduct",
+        "summary": "Update Product",
+        "tags": [
+          "Products (Go)"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProductDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated product retrieved successfully",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized - Invalid or missing token"
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "ProductController_deleteProduct",
+        "summary": "Delete Product",
+        "tags": [
+          "Products (Go)"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "b2189bdd-890f-4b07-bd81-d30fcc89dada"
+            },
+            "description": "Delete ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated product retrieved successfully",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized - Invalid or missing token"
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/go/api/v1/{id}": {
+      "get": {
+        "operationId": "ProductController_getProductById",
+        "summary": "Get Products By Id",
+        "tags": [
+          "Products (Go)"
+        ],
+        "requestBody": {
+          "required": true
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "b2189bdd-890f-4b07-bd81-d30fcc89dada"
+            },
+            "description": "Product ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product retrieved successfully",
             "content": {
               "application/json": {}
             }
@@ -748,6 +882,7 @@
           "bearerFormat": "JWT"
         }
       },
+
       "RegisterUserDto": {
         "type": "object",
         "properties": {
@@ -832,6 +967,44 @@
       },
       "createProductDto": {
         "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Product Name",
+            "description": "Name of the product",
+            "minLength": 3,
+            "maxLength": 100
+          },
+          "description": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number"
+          },
+          "quantity": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          },
+          "category_id": {
+            "type": "string"
+          },
+          "discount_price": {
+            "type": "number"
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "stock": {
+            "type": "number"
+          },
+          "sku": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateProductDto": {
         "properties": {
           "name": {
             "type": "string",
