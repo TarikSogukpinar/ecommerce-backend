@@ -47,3 +47,8 @@ type ProductUpdateInput struct {
 	Stock         int      `json:"stock,omitempty"`
 	SKU           string   `json:"sku,omitempty"`
 }
+
+type ProductPriceUpdateInput struct {
+	ID    string  `json:"id"`
+	Price float64 `json:"price"`
+}

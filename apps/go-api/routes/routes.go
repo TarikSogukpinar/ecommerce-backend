@@ -26,15 +26,18 @@ func SetupRoutes(app *fiber.App) {
 
 	// Product routes
 	productRoutes := api.Group("/products")
+	productRoutes.Get("/price", prodController.GetProductsByPriceRange)
+	productRoutes.Patch("/bulk-update", prodController.BulkUpdatePrices)
+	productRoutes.Patch("/:id/stock", prodController.UpdateProductStock)
 	productRoutes.Get("/", prodController.GetAllProducts)
 	productRoutes.Post("/", prodController.CreateProduct)
 	productRoutes.Get("/:id", prodController.GetProductByID)
 	productRoutes.Put("/:id", prodController.UpdateProduct)
 	productRoutes.Delete("/:id", prodController.DeleteProduct)
-	productRoutes.Get("/price-range", prodController.GetProductsByPriceRange)
 
 	// Category routes
 	categoryRoutes := api.Group("/categories")
+	categoryRoutes.Get("/:categoryId", catController.GetProductsByCategory)
 	categoryRoutes.Get("/", catController.GetAllCategories)
 	categoryRoutes.Post("/", catController.CreateCategory)
 	categoryRoutes.Get("/:id", catController.GetCategoryByID)

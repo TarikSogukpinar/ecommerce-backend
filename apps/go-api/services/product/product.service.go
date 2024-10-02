@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"go-api/models"
 
 	"gorm.io/gorm"
@@ -11,7 +12,9 @@ type ProductService interface {
 	GetProductByID(id string) (models.Product, error)
 	UpdateProduct(id string, input models.ProductUpdateInput) (models.Product, error)
 	DeleteProduct(id string) error
-	GetProductsByPriceRangeService(minPrice, maxPrice float64, sortOrder string) ([]models.Product, error)
+	GetProductsByPriceRange(minPrice, maxPrice float64, sortOrder string) ([]models.Product, error)
+	UpdateProductStock(id string, newStock int) (models.Product, error)
+	BulkUpdatePrices(priceUpdates []models.ProductPriceUpdateInput) error
 }
 
 type productService struct {
@@ -41,7 +44,6 @@ func (s *productService) CreateProduct(input models.ProductCreateInput) (models.
 	return product, nil
 }
 
-// UpdateProduct updates an existing product
 func (s *productService) UpdateProduct(id string, input models.ProductUpdateInput) (models.Product, error) {
 	var product models.Product
 	if err := s.DB.First(&product, id).Error; err != nil {
@@ -56,23 +58,20 @@ func (s *productService) UpdateProduct(id string, input models.ProductUpdateInpu
 }
 
 func (s *productService) DeleteProduct(id string) error {
-	// Ürünü bul ve sil
 	if err := s.DB.Delete(&models.Product{}, id).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *productService) GetProductsByPriceRangeService(minPrice, maxPrice float64, sortOrder string) ([]models.Product, error) {
+func (s *productService) GetProductsByPriceRange(minPrice, maxPrice float64, sortOrder string) ([]models.Product, error) {
 	var products []models.Product
 
-	// Define the sorting order
 	sort := "price ASC"
 	if sortOrder == "desc" {
 		sort = "price DESC"
 	}
 
-	// Fetch products in the price range and sort them
 	result := s.DB.Where("price BETWEEN ? AND ?", minPrice, maxPrice).Order(sort).Find(&products)
 	if result.Error != nil {
 		return nil, result.Error
@@ -87,4 +86,36 @@ func (s *productService) GetProductByID(id string) (models.Product, error) {
 		return models.Product{}, err
 	}
 	return product, nil
+}
+
+func (s *productService) UpdateProductStock(id string, newStock int) (models.Product, error) {
+	var product models.Product
+	if err := s.DB.First(&product, id).Error; err != nil {
+		return models.Product{}, err
+	}
+
+	product.Stock = newStock
+
+	if err := s.DB.Save(&product).Error; err != nil {
+		return models.Product{}, err
+	}
+
+	return product, nil
+}
+
+func (s *productService) BulkUpdatePrices(priceUpdates []models.ProductPriceUpdateInput) error {
+	for _, update := range priceUpdates {
+		var product models.Product
+		// Ürünü ID'ye göre buluyoruz
+		if err := s.DB.First(&product, update.ID).Error; err != nil {
+			return fmt.Errorf("product with ID %s not found", update.ID)
+		}
+		// Fiyatı güncelliyoruz
+		product.Price = update.Price
+		// Güncellenen ürünü veritabanına kaydediyoruz
+		if err := s.DB.Save(&product).Error; err != nil {
+			return fmt.Errorf("failed to update price for product ID %s: %v", update.ID, err)
+		}
+	}
+	return nil
 }

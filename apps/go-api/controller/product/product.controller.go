@@ -245,7 +245,7 @@ func (pc *ProductController) GetProductsByPriceRange(c *fiber.Ctx) error {
 		})
 	}
 
-	products, err := pc.ProductService.GetProductsByPriceRangeService(min, max, sortOrder)
+	products, err := pc.ProductService.GetProductsByPriceRange(min, max, sortOrder)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to fetch products",
@@ -253,4 +253,66 @@ func (pc *ProductController) GetProductsByPriceRange(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(products)
+}
+
+// UpdateProductStock godoc
+// @Summary      Update product stock
+// @Description  Updates the stock quantity of a product
+// @Tags         Products
+// @Accept       json
+// @Produce      json
+// @Param        id    path string true "Product ID"
+// @Param        stock body int    true "New Stock Quantity"
+// @Success      200  {object}  models.Product
+// @Failure      404  {object}  map[string]string
+// @Router       /products/{id}/stock [patch]
+func (pc *ProductController) UpdateProductStock(c *fiber.Ctx) error {
+	id := c.Params("id")
+	var input struct {
+		Stock int `json:"stock"`
+	}
+
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request body",
+		})
+	}
+
+	product, err := pc.ProductService.UpdateProductStock(id, input.Stock)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "Product not found",
+		})
+	}
+
+	return c.JSON(product)
+}
+
+// BulkUpdatePrices godoc
+// @Summary      Bulk update product prices
+// @Description  Updates prices for multiple products
+// @Tags         Products
+// @Accept       json
+// @Produce      json
+// @Param        prices body []models.ProductPriceUpdateInput true "Product prices to update"
+// @Success      200  {object}  map[string]string
+// @Failure      400  {object}  map[string]string "Invalid request"
+// @Failure      500  {object}  map[string]string "Could not update product prices"
+// @Router       /products/bulk-update [patch]
+func (pc *ProductController) BulkUpdatePrices(c *fiber.Ctx) error {
+	var priceUpdates []models.ProductPriceUpdateInput
+
+	if err := c.BodyParser(&priceUpdates); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request body",
+		})
+	}
+
+	if err := pc.ProductService.BulkUpdatePrices(priceUpdates); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.JSON(fiber.Map{"message": "Product prices updated successfully"})
 }

@@ -126,3 +126,30 @@ func (cc *CategoryController) DeleteCategory(c *fiber.Ctx) error {
 
 	return c.SendStatus(http.StatusNoContent)
 }
+
+// GetProductsByCategory godoc
+// @Summary      Get products by category
+// @Description  Returns all products for a given category
+// @Tags         Products
+// @Accept       json
+// @Produce      json
+// @Param        categoryId path string true "Category ID"
+// @Success      200  {array}  models.Product
+// @Failure      404  {object} map[string]string
+// @Router       /products/category/{categoryId} [get]
+func (cc *CategoryController) GetProductsByCategory(c *fiber.Ctx) error {
+	// Kategori ID'sini URL parametresinden alıyoruz
+	categoryId := c.Params("categoryId")
+
+	// Servis katmanında kategoriye ait ürünleri getiriyoruz
+	products, err := cc.CategoryService.GetProductsByCategory(categoryId)
+	if err != nil {
+		log.Println("Error fetching products by category:", err)
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{
+			"error": "No products found for the given category",
+		})
+	}
+
+	// Ürünleri başarıyla döndürür
+	return c.JSON(products)
+}
