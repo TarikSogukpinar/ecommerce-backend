@@ -206,9 +206,24 @@ func (pc *ProductController) DeleteProduct(c *fiber.Ctx) error {
 	})
 }
 
+// GetProductsByPriceRange godoc
+// @Summary      Get products by price range
+// @Description  Returns products within a specified price range, optionally sorted by price.
+// @Tags         Products
+// @Accept       json
+// @Produce      json
+// @Param        Authorization  header    string  true   "Bearer {token}"
+// @Param        min_price       query     number  true   "Minimum price"
+// @Param        max_price       query     number  true   "Maximum price"
+// @Param        sort            query     string  false  "Sort order (asc or desc)"
+// @Success      200  {array}    models.Product
+// @Failure      400  {object}   map[string]string "Invalid request"
+// @Failure      500  {object}   map[string]string "Failed to fetch products"
+// @Router       /products/price-range [get]
 func (pc *ProductController) GetProductsByPriceRange(c *fiber.Ctx) error {
 	minPrice := c.Query("min_price")
 	maxPrice := c.Query("max_price")
+	sortOrder := c.Query("sort")
 
 	if minPrice == "" || maxPrice == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -230,9 +245,7 @@ func (pc *ProductController) GetProductsByPriceRange(c *fiber.Ctx) error {
 		})
 	}
 
-	fmt.Println("Min:", min, "Max:", max)
-
-	products, err := pc.ProductService.GetProductsByPriceRangeService(min, max)
+	products, err := pc.ProductService.GetProductsByPriceRangeService(min, max, sortOrder)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to fetch products",

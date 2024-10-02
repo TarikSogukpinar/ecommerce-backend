@@ -2,15 +2,7 @@ basePath: /
 definitions:
   models.Category:
     properties:
-      created_at:
-        type: string
-      deleted_at:
-        type: string
-      id:
-        type: integer
       name:
-        type: string
-      updated_at:
         type: string
     type: object
   models.Product:
@@ -50,6 +42,8 @@ definitions:
         type: string
       discount_price:
         type: number
+      id:
+        type: integer
       image:
         type: string
       is_active:
@@ -73,6 +67,8 @@ definitions:
         type: string
       discount_price:
         type: number
+      id:
+        type: integer
       image:
         type: string
       is_active:
@@ -307,6 +303,56 @@ paths:
           schema:
             $ref: '#/definitions/models.Product'
       summary: Update a product
+      tags:
+      - Products
+  /products/price-range:
+    get:
+      consumes:
+      - application/json
+      description: Returns products within a specified price range, optionally sorted
+        by price.
+      parameters:
+      - description: Bearer {token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Minimum price
+        in: query
+        name: min_price
+        required: true
+        type: number
+      - description: Maximum price
+        in: query
+        name: max_price
+        required: true
+        type: number
+      - description: Sort order (asc or desc)
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Product'
+            type: array
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Failed to fetch products
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get products by price range
       tags:
       - Products
 swagger: "2.0"

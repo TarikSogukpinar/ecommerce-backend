@@ -31,6 +31,7 @@ func SetupRoutes(app *fiber.App) {
 	productRoutes.Get("/:id", prodController.GetProductByID)
 	productRoutes.Put("/:id", prodController.UpdateProduct)
 	productRoutes.Delete("/:id", prodController.DeleteProduct)
+	productRoutes.Get("/price-range", prodController.GetProductsByPriceRange)
 
 	// Category routes
 	categoryRoutes := api.Group("/categories")

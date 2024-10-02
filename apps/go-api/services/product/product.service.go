@@ -11,7 +11,7 @@ type ProductService interface {
 	GetProductByID(id string) (models.Product, error)
 	UpdateProduct(id string, input models.ProductUpdateInput) (models.Product, error)
 	DeleteProduct(id string) error
-	GetProductsByPriceRangeService(minPrice, maxPrice float64) ([]models.Product, error)
+	GetProductsByPriceRangeService(minPrice, maxPrice float64, sortOrder string) ([]models.Product, error)
 }
 
 type productService struct {
@@ -63,9 +63,17 @@ func (s *productService) DeleteProduct(id string) error {
 	return nil
 }
 
-func (s *productService) GetProductsByPriceRangeService(minPrice, maxPrice float64) ([]models.Product, error) {
+func (s *productService) GetProductsByPriceRangeService(minPrice, maxPrice float64, sortOrder string) ([]models.Product, error) {
 	var products []models.Product
-	result := s.DB.Where("price BETWEEN ? AND ?", minPrice, maxPrice).Find(&products)
+
+	// Define the sorting order
+	sort := "price ASC"
+	if sortOrder == "desc" {
+		sort = "price DESC"
+	}
+
+	// Fetch products in the price range and sort them
+	result := s.DB.Where("price BETWEEN ? AND ?", minPrice, maxPrice).Order(sort).Find(&products)
 	if result.Error != nil {
 		return nil, result.Error
 	}

@@ -52,4 +52,4 @@ import { HealthModule } from './core/healthCheck/health.module';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }
