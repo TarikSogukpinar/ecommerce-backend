@@ -1,7 +1,8 @@
 import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
 import { HealthService } from './health.service';
-import { HealthCheck } from '@nestjs/terminus';
+import { HealthCheck, HttpHealthIndicator } from '@nestjs/terminus';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
+import { RabbitMQHealthIndicator } from './rabbitMQHealth.service';
 
 @Controller({ path: 'health', version: '1' })
 @ApiTags('Health')

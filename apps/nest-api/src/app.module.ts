@@ -10,6 +10,7 @@ import { SupportModule } from './support/support.module';
 import { AdminModule } from './admin/admin.module';
 import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { CacheModule } from '@nestjs/cache-manager';
+import { HealthModule } from './core/healthCheck/health.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     AddressModule,
     SupportModule,
     AdminModule,
+    HealthModule,
     CacheModule.register(),
   ],
   controllers: [],
