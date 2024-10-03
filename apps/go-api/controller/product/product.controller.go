@@ -78,7 +78,7 @@ func (pc *ProductController) GetAllProducts(c *fiber.Ctx) error {
 // @Param        Authorization  header    string              true  "Bearer {token}"
 // @Param        product        body      models.ProductCreateInput  true  "Ürün oluşturma verileri"
 // @Success      201  {object}  models.Product
-// @Router       /products [post]
+// @Router       /products [get]
 func (pc *ProductController) GetProductByID(c *fiber.Ctx) error {
 
 	id := c.Params("id")

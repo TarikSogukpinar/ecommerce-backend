@@ -832,7 +832,7 @@
         ]
       }
     },
-    "/go/api/v1/{id}": {
+    "/go/api/v1/products/{id}": {
       "get": {
         "operationId": "ProductController_getProductById",
         "summary": "Get Products By Id",
@@ -871,6 +871,336 @@
           }
         ]
       }
+    },
+    "/go/api/v1/products/price": {
+      "get": {
+        "operationId": "ProductController_priceRange",
+        "summary": "Get Products By Price Range",
+        "tags": [
+          "Products (Go)"
+        ],
+        "parameters": [
+          {
+            "name": "min_price",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "example": 0
+            },
+            "description": "Minimum price for the product search"
+          },
+          {
+            "name": "max_price",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "example": 20
+            },
+            "description": "Maximum price for the product search"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "example": "asc"
+            },
+            "description": "Sort order for the price. Can be 'asc' for ascending or 'desc' for descending"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product Price retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Product"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          },
+          "500": {
+            "description": "Failed to fetch products"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/go/api/v1/products/bulk-update": {
+      "patch": {
+        "operationId": "ProductController_bulkUpdatePrices",
+        "summary": "Bulk Update Product Prices",
+        "tags": [
+          "Products (Go)"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ProductPriceUpdateInput"
+                }
+              },
+              "examples": {
+                "bulkUpdate": {
+                  "summary": "Bulk product price update example",
+                  "value": [
+                    {
+                      "id": "1007457550701133825",
+                      "price": 199.99
+                    },
+                    {
+                      "id": "1007457550701133826",
+                      "price": 149.99
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Product prices updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Product prices updated successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "500": {
+            "description": "Could not update product prices"
+          }
+        }
+      }
+    },
+    "/go/api/v1/products/{id}/stock": {
+      "patch": {
+        "operationId": "ProductController_updateProductStock",
+        "summary": "Update Product Stock",
+        "tags": [
+          "Products (Go)"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "1007457550701133825"
+            },
+            "description": "Product ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stock": {
+                    "type": "integer",
+                    "example": 50
+                  }
+                }
+              },
+              "examples": {
+                "updateStock": {
+                  "summary": "Update product stock example",
+                  "value": {
+                    "stock": 50
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Product stock updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found"
+          },
+          "500": {
+            "description": "Could not update product stock"
+          }
+        }
+      }
+    },
+    "/go/api/v1/categories": {
+      "get": {
+        "operationId": "CategoriesController_getAllCategories",
+        "summary": "Get All Categories",
+        "tags": [
+          "Category (Go)"
+        ],
+        "responses": {
+          "200": {
+            "description": "Categories retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found"
+          },
+          "500": {
+            "description": "Could not update product stock"
+          }
+        }
+      },
+      "post": {
+        "operationId": "CategoriesController_createCategories",
+        "summary": "Create Category",
+        "tags": [
+          "Category (Go)"
+        ],
+        "responses": {
+          "200": {
+            "description": "Categories created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Category not found"
+          },
+          "500": {
+            "description": "Could not create category"
+          }
+        }
+      }
+    },
+    "/go/api/v1/categories/{id}": {
+      "get": {
+        "operationId": "ProductController_getCategoryById",
+        "summary": "Get Category By Id",
+        "tags": [
+          "Category (Go)"
+        ],
+        "requestBody": {
+          "required": true
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "1007457560245895169"
+            },
+            "description": "Category ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Category retrieved successfully",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized - Invalid or missing token"
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "ProductController_deleteCategoryId",
+        "summary": "Delete Category By Id",
+        "tags": [
+          "Category (Go)"
+        ],
+        "requestBody": {
+          "required": true
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "1007457560245895169"
+            },
+            "description": "Category ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Category deleted successfully",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized - Invalid or missing token"
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -882,7 +1212,6 @@
           "bearerFormat": "JWT"
         }
       },
-
       "RegisterUserDto": {
         "type": "object",
         "properties": {
@@ -1039,6 +1368,20 @@
           },
           "sku": {
             "type": "string"
+          }
+        }
+      },
+      "ProductPriceUpdateInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "1007457550701133825"
+          },
+          "price": {
+            "type": "number",
+            "format": "float",
+            "example": 199.99
           }
         }
       }

@@ -138,10 +138,8 @@ func (cc *CategoryController) DeleteCategory(c *fiber.Ctx) error {
 // @Failure      404  {object} map[string]string
 // @Router       /products/category/{categoryId} [get]
 func (cc *CategoryController) GetProductsByCategory(c *fiber.Ctx) error {
-	// Kategori ID'sini URL parametresinden alıyoruz
 	categoryId := c.Params("categoryId")
 
-	// Servis katmanında kategoriye ait ürünleri getiriyoruz
 	products, err := cc.CategoryService.GetProductsByCategory(categoryId)
 	if err != nil {
 		log.Println("Error fetching products by category:", err)
@@ -150,6 +148,5 @@ func (cc *CategoryController) GetProductsByCategory(c *fiber.Ctx) error {
 		})
 	}
 
-	// Ürünleri başarıyla döndürür
 	return c.JSON(products)
 }

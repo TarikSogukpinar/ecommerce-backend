@@ -107,13 +107,12 @@ func (s *productService) UpdateProductStock(id string, newStock int) (models.Pro
 func (s *productService) BulkUpdatePrices(priceUpdates []models.ProductPriceUpdateInput) error {
 	for _, update := range priceUpdates {
 		var product models.Product
-		// Ürünü ID'ye göre buluyoruz
 		if err := s.DB.First(&product, update.ID).Error; err != nil {
 			return fmt.Errorf("product with ID %s not found", update.ID)
 		}
-		// Fiyatı güncelliyoruz
+
 		product.Price = update.Price
-		// Güncellenen ürünü veritabanına kaydediyoruz
+
 		if err := s.DB.Save(&product).Error; err != nil {
 			return fmt.Errorf("failed to update price for product ID %s: %v", update.ID, err)
 		}
@@ -124,20 +123,16 @@ func (s *productService) BulkUpdatePrices(priceUpdates []models.ProductPriceUpda
 func (s *productService) SearchProducts(query string, minPrice, maxPrice float64) ([]models.Product, error) {
 	var products []models.Product
 
-	// Temel sorgu
 	dbQuery := s.DB.Model(&models.Product{})
 
-	// Eğer bir arama sorgusu varsa, adı veya açıklamayı arıyoruz
 	if query != "" {
 		dbQuery = dbQuery.Where("name ILIKE ? OR description ILIKE ?", "%"+query+"%", "%"+query+"%")
 	}
 
-	// Fiyat aralığını kontrol ediyoruz
 	if minPrice > 0 && maxPrice > 0 {
 		dbQuery = dbQuery.Where("price BETWEEN ? AND ?", minPrice, maxPrice)
 	}
 
-	// Sorguyu çalıştırıp ürünleri getiriyoruz
 	if err := dbQuery.Find(&products).Error; err != nil {
 		return nil, err
 	}

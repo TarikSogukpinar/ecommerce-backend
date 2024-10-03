@@ -43,7 +43,6 @@ func (s *CategoryService) DeleteCategory(id uint) error {
 func (s *CategoryService) GetProductsByCategory(categoryId string) ([]models.Product, error) {
 	var products []models.Product
 
-	// Belirtilen kategoriye ait ürünleri sorguluyoruz
 	if err := s.DB.Where("category_id = ?", categoryId).Find(&products).Error; err != nil {
 		return nil, err
 	}

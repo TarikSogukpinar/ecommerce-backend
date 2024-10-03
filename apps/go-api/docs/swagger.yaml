@@ -59,6 +59,13 @@ definitions:
       stock:
         type: integer
     type: object
+  models.ProductPriceUpdateInput:
+    properties:
+      id:
+        type: string
+      price:
+        type: number
+    type: object
   models.ProductUpdateInput:
     properties:
       category_id:
@@ -305,6 +312,106 @@ paths:
       summary: Update a product
       tags:
       - Products
+  /products/{id}/stock:
+    patch:
+      consumes:
+      - application/json
+      description: Updates the stock quantity of a product
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: New Stock Quantity
+        in: body
+        name: stock
+        required: true
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Product'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update product stock
+      tags:
+      - Products
+  /products/bulk-update:
+    patch:
+      consumes:
+      - application/json
+      description: Updates prices for multiple products
+      parameters:
+      - description: Product prices to update
+        in: body
+        name: prices
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/models.ProductPriceUpdateInput'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Could not update product prices
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Bulk update product prices
+      tags:
+      - Products
+  /products/category/{categoryId}:
+    get:
+      consumes:
+      - application/json
+      description: Returns all products for a given category
+      parameters:
+      - description: Category ID
+        in: path
+        name: categoryId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Product'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get products by category
+      tags:
+      - Products
   /products/price-range:
     get:
       consumes:
@@ -353,6 +460,42 @@ paths:
               type: string
             type: object
       summary: Get products by price range
+      tags:
+      - Products
+  /products/search:
+    get:
+      consumes:
+      - application/json
+      description: Search for products by name, description, and price range
+      parameters:
+      - description: Search query
+        in: query
+        name: query
+        type: string
+      - description: Minimum price
+        in: query
+        name: min_price
+        type: number
+      - description: Maximum price
+        in: query
+        name: max_price
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Product'
+            type: array
+        "500":
+          description: Failed to search products
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Search products
       tags:
       - Products
 swagger: "2.0"
