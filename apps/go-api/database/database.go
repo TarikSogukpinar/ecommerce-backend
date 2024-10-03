@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 
+	seeders "go-api/seeder"
+
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -32,5 +34,8 @@ func ConnectDB() {
 	}
 
 	log.Println("Database connection established")
+
+	seeders.SeedCategories(DB, 5)
+	seeders.SeedProducts(DB, 20)
 
 }

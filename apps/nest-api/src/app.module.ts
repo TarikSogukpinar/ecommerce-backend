@@ -11,6 +11,7 @@ import { AdminModule } from './admin/admin.module';
 import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { CacheModule } from '@nestjs/cache-manager';
 import { HealthModule } from './core/healthCheck/health.module';
+import { PrismaService } from './database/database.service';
 
 @Module({
   imports: [
@@ -50,6 +51,6 @@ import { HealthModule } from './core/healthCheck/health.module';
     CacheModule.register(),
   ],
   controllers: [],
-  providers: [],
+  providers: [PrismaService],
 })
 export class AppModule { }
