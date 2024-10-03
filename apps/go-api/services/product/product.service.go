@@ -15,6 +15,7 @@ type ProductService interface {
 	GetProductsByPriceRange(minPrice, maxPrice float64, sortOrder string) ([]models.Product, error)
 	UpdateProductStock(id string, newStock int) (models.Product, error)
 	BulkUpdatePrices(priceUpdates []models.ProductPriceUpdateInput) error
+	SearchProducts(query string, minPrice, maxPrice float64) ([]models.Product, error)
 }
 
 type productService struct {
@@ -118,4 +119,28 @@ func (s *productService) BulkUpdatePrices(priceUpdates []models.ProductPriceUpda
 		}
 	}
 	return nil
+}
+
+func (s *productService) SearchProducts(query string, minPrice, maxPrice float64) ([]models.Product, error) {
+	var products []models.Product
+
+	// Temel sorgu
+	dbQuery := s.DB.Model(&models.Product{})
+
+	// Eğer bir arama sorgusu varsa, adı veya açıklamayı arıyoruz
+	if query != "" {
+		dbQuery = dbQuery.Where("name ILIKE ? OR description ILIKE ?", "%"+query+"%", "%"+query+"%")
+	}
+
+	// Fiyat aralığını kontrol ediyoruz
+	if minPrice > 0 && maxPrice > 0 {
+		dbQuery = dbQuery.Where("price BETWEEN ? AND ?", minPrice, maxPrice)
+	}
+
+	// Sorguyu çalıştırıp ürünleri getiriyoruz
+	if err := dbQuery.Find(&products).Error; err != nil {
+		return nil, err
+	}
+
+	return products, nil
 }

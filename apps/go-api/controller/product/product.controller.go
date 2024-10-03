@@ -49,7 +49,6 @@ func (pc *ProductController) GetAllProducts(c *fiber.Ctx) error {
 
 	tokenString := strings.Replace(authHeader, "Bearer ", "", 1)
 
-	// Validate token using middleware function
 	claims, err := middleware.ValidateToken(tokenString)
 	if err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
@@ -91,8 +90,6 @@ func (pc *ProductController) GetProductByID(c *fiber.Ctx) error {
 			"error": "Product not found",
 		})
 	}
-
-	fmt.Print("Product:", product)
 
 	return c.Status(fiber.StatusOK).JSON(product)
 }
@@ -315,4 +312,52 @@ func (pc *ProductController) BulkUpdatePrices(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{"message": "Product prices updated successfully"})
+}
+
+// SearchProducts godoc
+// @Summary      Search products
+// @Description  Search for products by name, description, and price range
+// @Tags         Products
+// @Accept       json
+// @Produce      json
+// @Param        query      query string  false "Search query"
+// @Param        min_price  query number  false "Minimum price"
+// @Param        max_price  query number  false "Maximum price"
+// @Success      200  {array}  models.Product
+// @Failure      500  {object}  map[string]string "Failed to search products"
+// @Router       /products/search [get]
+func (pc *ProductController) SearchProducts(c *fiber.Ctx) error {
+	query := c.Query("query")
+	minPriceStr := c.Query("min_price")
+	maxPriceStr := c.Query("max_price")
+
+	var minPrice, maxPrice float64
+	var err error
+
+	if minPriceStr != "" {
+		minPrice, err = strconv.ParseFloat(minPriceStr, 64)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Invalid min_price",
+			})
+		}
+	}
+
+	if maxPriceStr != "" {
+		maxPrice, err = strconv.ParseFloat(maxPriceStr, 64)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Invalid max_price",
+			})
+		}
+	}
+
+	products, err := pc.ProductService.SearchProducts(query, minPrice, maxPrice)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to search products",
+		})
+	}
+
+	return c.JSON(products)
 }
