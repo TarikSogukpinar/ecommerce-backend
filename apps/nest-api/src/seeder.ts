@@ -18,7 +18,7 @@ async function bootstrap() {
         await prismaService.$connect();
         console.log('Database connection successful.');
 
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 10000; i++) {
             console.log(`Creating user ${i + 1}...`);
             const user = await prismaService.user.create({
                 data: {

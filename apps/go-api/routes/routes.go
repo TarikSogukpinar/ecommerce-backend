@@ -1,30 +1,27 @@
 package routes
 
 import (
-	categoryController "go-api/controller/category" // Category controller import
-	productController "go-api/controller/product"   // Product controller import
+	categoryController "go-api/controller/category"
+	productController "go-api/controller/product"
 	"go-api/database"
-	categoryService "go-api/services/category" // Category service import with alias
-	productService "go-api/services/product"   // Product service import with alias
+	categoryService "go-api/services/category"
+	productService "go-api/services/product"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 func SetupRoutes(app *fiber.App) {
-	// Database connection
+
 	db := database.DB
 
-	// Product setup
-	prodService := productService.NewProductService(db)  // Product service
-	catService := categoryService.NewCategoryService(db) // Category service
+	prodService := productService.NewProductService(db)
+	catService := categoryService.NewCategoryService(db)
 	prodController := productController.NewProductController(prodService, *catService, db)
 
-	// Category setup
 	catController := categoryController.NewCategoryController(catService)
 
 	api := app.Group("/api/v1")
 
-	// Product routes
 	productRoutes := api.Group("/products")
 	productRoutes.Get("/price", prodController.GetProductsByPriceRange)
 	productRoutes.Patch("/bulk-update", prodController.BulkUpdatePrices)
@@ -35,7 +32,6 @@ func SetupRoutes(app *fiber.App) {
 	productRoutes.Put("/:id", prodController.UpdateProduct)
 	productRoutes.Delete("/:id", prodController.DeleteProduct)
 
-	// Category routes
 	categoryRoutes := api.Group("/categories")
 	categoryRoutes.Get("/:categoryId", catController.GetProductsByCategory)
 	categoryRoutes.Get("/", catController.GetAllCategories)

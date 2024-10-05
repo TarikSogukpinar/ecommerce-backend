@@ -28,7 +28,7 @@ export class AuthService {
     private readonly tokenService: TokenService,
 
     @Inject('USER_SERVICE') private readonly client: ClientProxy,
-  ) {}
+  ) { }
 
   async registerUserService(
     registerUserDto: RegisterUserDto,

@@ -22,7 +22,6 @@ type Message struct {
 var Conn *amqp.Connection
 var Ch *amqp.Channel
 
-// InitializeRabbitMQ initializes RabbitMQ connection and channel
 func InitializeRabbitMQ() (*amqp.Connection, *amqp.Channel, error) {
 	conn, err := amqp.Dial(os.Getenv("RABBITMQ_URL"))
 	if err != nil {
@@ -41,7 +40,6 @@ func InitializeRabbitMQ() (*amqp.Connection, *amqp.Channel, error) {
 	return conn, ch, nil
 }
 
-// ConsumeMessages starts consuming messages from RabbitMQ
 func ConsumeMessages(ch *amqp.Channel) {
 	msgs, err := ch.Consume(
 		"token_created_queue",
@@ -87,7 +85,6 @@ func ConsumeMessages(ch *amqp.Channel) {
 	<-forever
 }
 
-// CloseRabbitMQ closes the RabbitMQ connection and channel
 func CloseRabbitMQ() {
 	if Ch != nil {
 		Ch.Close()
